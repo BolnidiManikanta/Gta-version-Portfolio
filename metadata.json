@@ -1,0 +1,6 @@
+{
+  "name": "GTA Portfolio - Bolnidi Manikanta",
+  "description": "An interactive GTA-style cinematic game menu portfolio for Bolnidi Manikanta featuring missions, skills armory, achievements, and encrypted contact terminal.",
+  "requestFramePermissions": ["camera"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

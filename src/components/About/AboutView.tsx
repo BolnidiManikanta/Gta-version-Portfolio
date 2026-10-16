@@ -14,9 +14,7 @@ export const AboutView: React.FC<AboutViewProps> = ({
   onSelectSection,
   customHeroPhoto,
 }) => {
-  const photoSrc =
-    customHeroPhoto ||
-    'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=1200&auto=format&fit=crop&q=80';
+  const photoSrc = customHeroPhoto || '/about-page.png';
 
   const handleDownloadResume = () => {
     gtaAudio.playSelect();
@@ -47,9 +45,9 @@ export const AboutView: React.FC<AboutViewProps> = ({
       {/* Background layer with dark twilight city & subtle ambient tint */}
       <div className="fixed inset-0 -z-30 overflow-hidden pointer-events-none">
         <img
-          src="https://images.unsplash.com/photo-1519501025264-65ba15a82390?w=1920&auto=format&fit=crop&q=80"
+          src="/about-page.png"
           alt="Night City Skyline"
-          className="w-full h-full object-cover filter contrast-125 brightness-50"
+          className="w-full h-full object-cover filter contrast-125 brightness-45"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black via-black/80 to-purple-950/40" />
       </div>

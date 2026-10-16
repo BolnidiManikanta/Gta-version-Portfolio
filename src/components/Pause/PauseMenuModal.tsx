@@ -16,6 +16,10 @@ import {
   RotateCcw,
   Film,
   X,
+  BookOpen,
+  Briefcase,
+  Terminal,
+  FolderGit2,
 } from 'lucide-react';
 
 interface PauseMenuModalProps {
@@ -24,6 +28,8 @@ interface PauseMenuModalProps {
   onOpenMap: () => void;
   onOpenPhone: () => void;
   onSelectDistrict: (district: DistrictId) => void;
+  onOpenSkills?: () => void;
+  onOpenProjects?: () => void;
   appMode: AppMode;
   onToggleAppMode: () => void;
   timeOfDay: TimeOfDay;
@@ -40,6 +46,8 @@ export const PauseMenuModal: React.FC<PauseMenuModalProps> = ({
   onOpenMap,
   onOpenPhone,
   onSelectDistrict,
+  onOpenSkills,
+  onOpenProjects,
   appMode,
   onToggleAppMode,
   timeOfDay,
@@ -151,6 +159,78 @@ export const PauseMenuModal: React.FC<PauseMenuModalProps> = ({
             <span className="text-[10px] text-neutral-400 group-hover:text-white">HQ</span>
           </button>
 
+          {/* Dedicated Skills Arsenal */}
+          {onOpenSkills && (
+            <button
+              onClick={() => {
+                gtaAudio.playSelect();
+                onOpenSkills();
+                onClose();
+              }}
+              onMouseEnter={() => gtaAudio.playHover()}
+              className="w-full py-2.5 px-4 bg-white/5 hover:bg-[#ec008c] text-white rounded flex items-center justify-between transition-colors border border-white/10 hover:border-pink-400 cursor-pointer group"
+            >
+              <div className="flex items-center gap-3">
+                <Terminal className="w-4 h-4 text-pink-400 group-hover:text-white" />
+                <span>SKILLS ARSENAL</span>
+              </div>
+              <span className="text-[10px] text-pink-300 group-hover:text-white font-mono">/skills</span>
+            </button>
+          )}
+
+          {/* Dedicated Project Vault */}
+          {onOpenProjects && (
+            <button
+              onClick={() => {
+                gtaAudio.playSelect();
+                onOpenProjects();
+                onClose();
+              }}
+              onMouseEnter={() => gtaAudio.playHover()}
+              className="w-full py-2.5 px-4 bg-white/5 hover:bg-[#ec008c] text-white rounded flex items-center justify-between transition-colors border border-white/10 hover:border-pink-400 cursor-pointer group"
+            >
+              <div className="flex items-center gap-3">
+                <FolderGit2 className="w-4 h-4 text-pink-400 group-hover:text-white" />
+                <span>PROJECT VAULT (25 REPOSITORIES)</span>
+              </div>
+              <span className="text-[10px] text-pink-300 group-hover:text-white font-mono">/projects</span>
+            </button>
+          )}
+
+          {/* Research Publications District */}
+          <button
+            onClick={() => {
+              gtaAudio.playSelect();
+              onSelectDistrict('career_district');
+              onClose();
+            }}
+            onMouseEnter={() => gtaAudio.playHover()}
+            className="w-full py-2.5 px-4 bg-white/5 hover:bg-purple-600 text-white rounded flex items-center justify-between transition-colors border border-white/10 hover:border-purple-400 cursor-pointer group"
+          >
+            <div className="flex items-center gap-3">
+              <BookOpen className="w-4 h-4 text-purple-400 group-hover:text-white" />
+              <span>RESEARCH PUBLICATIONS & PAPERS</span>
+            </div>
+            <span className="text-[10px] text-purple-300 group-hover:text-white">IEEE</span>
+          </button>
+
+          {/* Services & Engineering Specs District */}
+          <button
+            onClick={() => {
+              gtaAudio.playSelect();
+              onSelectDistrict('dev_district');
+              onClose();
+            }}
+            onMouseEnter={() => gtaAudio.playHover()}
+            className="w-full py-2.5 px-4 bg-white/5 hover:bg-blue-600 text-white rounded flex items-center justify-between transition-colors border border-white/10 hover:border-blue-400 cursor-pointer group"
+          >
+            <div className="flex items-center gap-3">
+              <Briefcase className="w-4 h-4 text-blue-400 group-hover:text-white" />
+              <span>ENGINEERING SERVICES & SPECS</span>
+            </div>
+            <span className="text-[10px] text-blue-300 group-hover:text-white">DEV</span>
+          </button>
+
           {/* 5. Switch Mode: Game vs Quick Portfolio */}
           <button
             onClick={() => {
@@ -208,7 +288,7 @@ export const PauseMenuModal: React.FC<PauseMenuModalProps> = ({
             <span className="text-[10px] text-neutral-400 group-hover:text-white">[M KEY]</span>
           </button>
 
-          {/* 8. Replay Walking Intro */}
+          {/* 8. Replay Cinematic Intro */}
           {onReplayWalkingIntro && (
             <button
               onClick={() => {
@@ -221,7 +301,7 @@ export const PauseMenuModal: React.FC<PauseMenuModalProps> = ({
             >
               <div className="flex items-center gap-3">
                 <Film className="w-4 h-4 text-pink-400 group-hover:text-white" />
-                <span>REPLAY CINEMATIC WALKING INTRO</span>
+                <span>REPLAY CINEMATIC INTRO</span>
               </div>
               <span className="text-[10px] text-pink-300 group-hover:text-white">[INTRO]</span>
             </button>

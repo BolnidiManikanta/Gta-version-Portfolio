@@ -495,6 +495,290 @@ class GTAAudioManager {
       // Audio fallback
     }
   }
+
+  // --- VEHICLE & MOVEMENT AUDIO ---
+  private engineOsc: OscillatorNode | null = null;
+  private engineSubOsc: OscillatorNode | null = null;
+  private engineGain: GainNode | null = null;
+  private engineFilter: BiquadFilterNode | null = null;
+  private isEngineRunning = false;
+
+  /**
+   * Heavy car door latch thud & metallic seal
+   */
+  public playCarDoor() {
+    if (this.isMuted) return;
+    try {
+      const ctx = this.getContext();
+      if (!ctx) return;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(140, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(45, ctx.currentTime + 0.12);
+
+      gain.gain.setValueAtTime(0.25, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.14);
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.14);
+    } catch {
+      // Audio fallback
+    }
+  }
+
+  /**
+   * Vehicle starter ignition crank + engine burst
+   */
+  public playCarEngineStart() {
+    if (this.isMuted) return;
+    try {
+      const ctx = this.getContext();
+      if (!ctx) return;
+      // 2 quick starter motor chugs
+      [0, 0.08].forEach((delay) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(65, ctx.currentTime + delay);
+        osc.frequency.linearRampToValueAtTime(95, ctx.currentTime + delay + 0.06);
+
+        gain.gain.setValueAtTime(0.12, ctx.currentTime + delay);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + delay + 0.07);
+
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(ctx.currentTime + delay);
+        osc.stop(ctx.currentTime + delay + 0.07);
+      });
+
+      // Engine rev ignition burst
+      const burstOsc = ctx.createOscillator();
+      const burstGain = ctx.createGain();
+      burstOsc.type = 'sawtooth';
+      burstOsc.frequency.setValueAtTime(80, ctx.currentTime + 0.18);
+      burstOsc.frequency.exponentialRampToValueAtTime(260, ctx.currentTime + 0.32);
+      burstOsc.frequency.exponentialRampToValueAtTime(110, ctx.currentTime + 0.55);
+
+      burstGain.gain.setValueAtTime(0.16, ctx.currentTime + 0.18);
+      burstGain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.55);
+
+      burstOsc.connect(burstGain);
+      burstGain.connect(ctx.destination);
+      burstOsc.start(ctx.currentTime + 0.18);
+      burstOsc.stop(ctx.currentTime + 0.55);
+    } catch {
+      // Audio fallback
+    }
+  }
+
+  /**
+   * Start continuous engine rumble loop for car driving
+   */
+  public startCarEngine() {
+    if (this.isMuted || this.isEngineRunning) return;
+    try {
+      const ctx = this.getContext();
+      if (!ctx) return;
+
+      const now = ctx.currentTime;
+      const osc = ctx.createOscillator();
+      const subOsc = ctx.createOscillator();
+      const filter = ctx.createBiquadFilter();
+      const gain = ctx.createGain();
+
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(45, now); // Idle rumble ~45Hz
+
+      subOsc.type = 'triangle';
+      subOsc.frequency.setValueAtTime(22.5, now);
+
+      filter.type = 'lowpass';
+      filter.frequency.setValueAtTime(280, now);
+
+      gain.gain.setValueAtTime(0.06, now);
+
+      osc.connect(filter);
+      subOsc.connect(filter);
+      filter.connect(gain);
+      gain.connect(ctx.destination);
+
+      osc.start();
+      subOsc.start();
+
+      this.engineOsc = osc;
+      this.engineSubOsc = subOsc;
+      this.engineFilter = filter;
+      this.engineGain = gain;
+      this.isEngineRunning = true;
+    } catch {
+      this.isEngineRunning = false;
+    }
+  }
+
+  /**
+   * Update engine pitch & volume dynamically based on speed & acceleration
+   */
+  public updateCarEngine(speedRatio: number, isAccelerating: boolean) {
+    if (!this.isEngineRunning || !this.engineOsc || !this.engineFilter || !this.engineGain) return;
+    try {
+      const ctx = this.getContext();
+      if (!ctx) return;
+      const now = ctx.currentTime;
+
+      // Base idle: 45Hz, Max rev: 220Hz
+      const targetFreq = 45 + speedRatio * 165 + (isAccelerating ? 25 : 0);
+      this.engineOsc.frequency.setTargetAtTime(targetFreq, now, 0.08);
+
+      if (this.engineSubOsc) {
+        this.engineSubOsc.frequency.setTargetAtTime(targetFreq * 0.5, now, 0.08);
+      }
+
+      const targetFilter = 280 + speedRatio * 750 + (isAccelerating ? 300 : 0);
+      this.engineFilter.frequency.setTargetAtTime(targetFilter, now, 0.08);
+
+      const targetGain = 0.05 + speedRatio * 0.08 + (isAccelerating ? 0.04 : 0);
+      this.engineGain.gain.setTargetAtTime(targetGain, now, 0.08);
+    } catch {
+      // Audio fallback
+    }
+  }
+
+  /**
+   * Stop continuous engine rumble
+   */
+  public stopCarEngine() {
+    try {
+      if (this.engineOsc) {
+        this.engineOsc.stop();
+        this.engineOsc.disconnect();
+        this.engineOsc = null;
+      }
+      if (this.engineSubOsc) {
+        this.engineSubOsc.stop();
+        this.engineSubOsc.disconnect();
+        this.engineSubOsc = null;
+      }
+      if (this.engineFilter) {
+        this.engineFilter.disconnect();
+        this.engineFilter = null;
+      }
+      if (this.engineGain) {
+        this.engineGain.disconnect();
+        this.engineGain = null;
+      }
+      this.isEngineRunning = false;
+    } catch {
+      this.isEngineRunning = false;
+    }
+  }
+
+  /**
+   * Tire brake friction screech
+   */
+  public playTireScreech() {
+    if (this.isMuted) return;
+    try {
+      const ctx = this.getContext();
+      if (!ctx) return;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(850, ctx.currentTime);
+      osc.frequency.linearRampToValueAtTime(620, ctx.currentTime + 0.16);
+
+      gain.gain.setValueAtTime(0.08, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.16);
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.16);
+    } catch {
+      // Audio fallback
+    }
+  }
+
+  /**
+   * Classic Dual-Tone 80s American Car Horn
+   */
+  public playCarHorn() {
+    if (this.isMuted) return;
+    try {
+      const ctx = this.getContext();
+      if (!ctx) return;
+      [420, 520].forEach((freq) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(freq, ctx.currentTime);
+        gain.gain.setValueAtTime(0.12, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.32);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.32);
+      });
+    } catch {
+      // Audio fallback
+    }
+  }
+
+  /**
+   * Pavement footstep click
+   */
+  public playFootstep(isSprinting: boolean) {
+    if (this.isMuted) return;
+    try {
+      const ctx = this.getContext();
+      if (!ctx) return;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(isSprinting ? 120 : 90, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(30, ctx.currentTime + 0.04);
+
+      gain.gain.setValueAtTime(isSprinting ? 0.05 : 0.025, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.04);
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.04);
+    } catch {
+      // Audio fallback
+    }
+  }
+
+  /**
+   * Project Discovered Fanfare Chime
+   */
+  public playProjectDiscovered() {
+    if (this.isMuted) return;
+    try {
+      const ctx = this.getContext();
+      if (!ctx) return;
+      // Crisp 4-note ascending fanfare
+      [523.25, 659.25, 783.99, 1046.5].forEach((freq, idx) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'triangle';
+        const start = ctx.currentTime + idx * 0.09;
+        osc.frequency.setValueAtTime(freq, start);
+        gain.gain.setValueAtTime(0.12, start);
+        gain.gain.exponentialRampToValueAtTime(0.001, start + 0.35);
+
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(start);
+        osc.stop(start + 0.35);
+      });
+    } catch {
+      // Audio fallback
+    }
+  }
 }
 
 export const gtaAudio = new GTAAudioManager();

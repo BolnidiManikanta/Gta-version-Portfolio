@@ -19,10 +19,12 @@ const MENU_ITEMS: MenuItem[] = [
   { id: 'start', label: 'START GAME' },
   { id: 'about', label: 'ABOUT ME' },
   { id: 'skills', label: 'SKILLS' },
-  { id: 'projects', label: 'PROJECTS', badge: '15+' },
+  { id: 'projects', label: 'PROJECTS', badge: '25' },
+  { id: 'research', label: 'RESEARCH', badge: '4' },
+  { id: 'services', label: 'SERVICES' },
   { id: 'experience', label: 'EXPERIENCE' },
-  { id: 'achievements', label: 'ACHIEVEMENTS' },
-  { id: 'academy', label: 'ACADEMY' },
+  { id: 'achievements', label: 'ACHIEVEMENTS', badge: '17' },
+  { id: 'academy', label: 'ACADEMY', badge: '8.6' },
   { id: 'contact', label: 'CONTACT' },
   { id: 'exit', label: 'EXIT GAME' },
 ];
@@ -179,11 +181,15 @@ export const MainMenu: React.FC<MainMenuProps> = ({
             <span className="text-white/50">SPECIALIZATION:</span>
             <span className="text-cyan-400">AI • CYBER • FULL STACK</span>
           </div>
+          <div className="flex justify-between">
+            <span className="text-white/50">VERIFIED METRICS:</span>
+            <span className="text-amber-400 font-bold">25 REPOS • 17 CERTS • 8.6 CGPA</span>
+          </div>
           <div className="flex justify-between items-center pt-1 border-t border-white/10">
             <span className="text-white/50">STATUS:</span>
             <span className="inline-flex items-center gap-1 text-emerald-400 font-bold">
               <Shield className="w-3 h-3 text-emerald-400" />
-              READY FOR COMBAT
+              AVAILABLE FOR MISSIONS
             </span>
           </div>
         </div>

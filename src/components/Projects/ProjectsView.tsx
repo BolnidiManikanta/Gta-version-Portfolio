@@ -2,254 +2,325 @@ import React, { useState } from 'react';
 import { SectionId, ProjectItem } from '../../types';
 import { projectsData } from '../../data/portfolioData';
 import { gtaAudio } from '../../utils/audio';
-import { ArrowLeft, ExternalLink, Github, Laptop, Shield, Zap, Crosshair } from 'lucide-react';
+import { ProjectDossierModal } from './ProjectDossierModal';
+import {
+  Gamepad2,
+  Compass,
+  Building2,
+  ExternalLink,
+  Search,
+  Sparkles,
+  Layers,
+  ArrowRight,
+  ShieldCheck,
+  Cpu,
+  Car,
+  FileCode2,
+} from 'lucide-react';
 
 interface ProjectsViewProps {
-  onSelectSection: (section: SectionId) => void;
+  onSelectSection?: (section: SectionId) => void;
+  onOpenProjects?: (slug?: string) => void;
 }
 
-export const ProjectsView: React.FC<ProjectsViewProps> = ({ onSelectSection }) => {
-  const [selectedProjectId, setSelectedProjectId] = useState<string>(projectsData[0].id);
+type DistrictFilter = 'all' | 'fullstack' | 'ai' | 'cyber' | 'research';
 
-  const selectedProject: ProjectItem =
-    projectsData.find((p) => p.id === selectedProjectId) || projectsData[0];
+export const ProjectsView: React.FC<ProjectsViewProps> = ({
+  onSelectSection,
+  onOpenProjects,
+}) => {
+  const [selectedFilter, setSelectedFilter] = useState<DistrictFilter>('all');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [activeDossierProj, setActiveDossierProj] = useState<ProjectItem | null>(null);
+
+  // Filter projects based on district & search
+  const filteredProjects = projectsData.filter((proj) => {
+    const cat = (proj.category || '').toLowerCase();
+    const techs = (proj.technologies || []).join(' ').toLowerCase();
+    const q = searchQuery.toLowerCase();
+
+    // Search filter
+    const matchesSearch =
+      !searchQuery ||
+      proj.title.toLowerCase().includes(q) ||
+      cat.includes(q) ||
+      techs.includes(q) ||
+      (proj.problem && proj.problem.toLowerCase().includes(q)) ||
+      (proj.description && proj.description.toLowerCase().includes(q));
+
+    if (!matchesSearch) return false;
+
+    // District filter
+    if (selectedFilter === 'all') return true;
+    if (selectedFilter === 'ai') {
+      return cat.includes('ai') || cat.includes('vision') || cat.includes('healthcare') || techs.includes('opencv');
+    }
+    if (selectedFilter === 'cyber') {
+      return cat.includes('security') || cat.includes('cyber') || cat.includes('vuln') || techs.includes('clamav');
+    }
+    if (selectedFilter === 'research') {
+      return cat.includes('research') || cat.includes('cloud') || cat.includes('academic') || !!proj.relatedResearch;
+    }
+    if (selectedFilter === 'fullstack') {
+      return (
+        !cat.includes('ai') &&
+        !cat.includes('vision') &&
+        !cat.includes('security') &&
+        !cat.includes('research') &&
+        !cat.includes('academic')
+      );
+    }
+    return true;
+  });
+
+  const handleLaunchGame = (slug?: string) => {
+    try {
+      gtaAudio.playSelect();
+      gtaAudio.playBoot();
+    } catch {
+      // Safety
+    }
+    if (onOpenProjects) {
+      onOpenProjects(slug);
+    }
+  };
 
   return (
-    <div className="relative w-full min-h-screen pt-20 pb-16 px-4 sm:px-8 md:px-14 lg:px-20 flex flex-col justify-start">
-      {/* Background layer with dusk cityscape & purple ambient light */}
-      <div className="fixed inset-0 -z-30 overflow-hidden pointer-events-none">
-        <img
-          src="https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=1920&auto=format&fit=crop&q=80"
-          alt="Dusk City"
-          className="w-full h-full object-cover filter contrast-125 brightness-40"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/85 to-purple-950/40" />
-      </div>
+    <div
+      id="work-page"
+      className="relative w-full min-h-screen py-16 px-4 sm:px-8 bg-neutral-950 text-white font-sans selection:bg-pink-600 selection:text-white"
+    >
+      {/* Vice City Ambient Background Glow */}
+      <div className="absolute top-0 left-1/4 w-96 h-96 bg-pink-600/10 rounded-full blur-[140px] pointer-events-none" />
+      <div className="absolute top-1/3 right-10 w-96 h-96 bg-cyan-500/10 rounded-full blur-[140px] pointer-events-none" />
+      <div className="absolute bottom-10 left-1/3 w-96 h-96 bg-amber-500/10 rounded-full blur-[140px] pointer-events-none" />
 
-      {/* Header: PROJECTS + Cursive Operations */}
-      <div className="flex flex-wrap items-end justify-between border-b border-pink-500/40 pb-4 mb-6">
-        <div>
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => {
-                gtaAudio.playBack();
-                onSelectSection('start');
-              }}
-              className="flex items-center gap-1.5 px-3 py-1 bg-black/80 border border-pink-500/50 hover:bg-[#ec008c] text-white font-hud text-xs tracking-wider rounded-xs cursor-pointer transition-colors"
-            >
-              <ArrowLeft className="w-3.5 h-3.5" />
-              <span>ESC / BACK</span>
-            </button>
-            <span className="font-hud text-xs text-pink-400 uppercase tracking-widest">
-              ACTIVE MISSIONS ARCHIVE
-            </span>
-          </div>
+      <div className="relative max-w-7xl mx-auto space-y-10">
+        {/* HEADER: GTA VICE CITY BANNER & 3D GAME LAUNCHER */}
+        <div className="p-6 sm:p-10 rounded-2xl bg-gradient-to-r from-neutral-900/90 via-black/95 to-neutral-900/90 border-2 border-pink-500/60 shadow-[0_0_40px_rgba(236,72,153,0.35)] relative overflow-hidden backdrop-blur-xl">
+          {/* Neon Stripe */}
+          <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-pink-500 via-cyan-400 to-amber-400 animate-pulse" />
 
-          <div className="flex items-baseline gap-3 mt-1">
-            <h1 className="font-gta text-6xl sm:text-7xl md:text-8xl text-white tracking-wider leading-none">
-              PROJECTS
-            </h1>
-            <span className="font-script text-3xl sm:text-4xl text-[#ec008c] -rotate-3 glow-pink">
-              Operations
-            </span>
-          </div>
-        </div>
+          <div className="flex flex-col lg:flex-row items-center justify-between gap-8">
+            <div className="space-y-3 text-center lg:text-left max-w-2xl">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-pink-500/15 border border-pink-500/40 text-pink-300 font-mono text-xs tracking-widest uppercase">
+                <Gamepad2 className="w-3.5 h-3.5 text-pink-400 animate-bounce" />
+                PLAYABLE THIRD-PERSON OPEN WORLD
+              </div>
 
-        <div className="mt-3 sm:mt-0 font-hud text-xs text-white/70 bg-black/60 border border-white/20 px-3 py-2">
-          TOTAL COMPLETED OPS: <span className="text-pink-400 font-bold">{projectsData.length} MISSIONS</span>
-        </div>
-      </div>
+              <h1 className="font-hud text-3xl sm:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white via-pink-200 to-cyan-300 tracking-wider uppercase drop-shadow-[0_2px_15px_rgba(236,72,153,0.6)]">
+                GTA: VICE CITY // PROJECT VAULT
+              </h1>
 
-      {/* Main Grid: Mission Selector on Left + Mission Briefing Laptop Hologram on Right */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        {/* Left Column: Mission Directory List */}
-        <div className="lg:col-span-5 space-y-2 max-h-[640px] overflow-y-auto pr-2">
-          <div className="text-xs font-hud text-pink-400 tracking-widest uppercase mb-2 flex items-center justify-between sticky top-0 bg-black/90 p-2 z-10 border-b border-pink-500/30">
-            <span>SELECT OPERATION BRIEFING</span>
-            <span className="text-white/50">{projectsData.length} OPS AVAILABLE</span>
-          </div>
+              <p className="text-sm sm:text-base text-neutral-300 font-mono leading-relaxed">
+                Take control of <span className="text-cyan-300 font-bold">Tommy Vercetti</span> in his iconic turquoise palm shirt. Drive your sports car down Ocean Drive, explore 4 vibrant city districts, enter physical tech facilities, and inspect production repositories in full 3D.
+              </p>
 
-          {projectsData.map((project, idx) => {
-            const isSelected = project.id === selectedProjectId;
-            return (
+              {/* Game Key Controls Hint */}
+              <div className="flex flex-wrap items-center gap-2 pt-2 justify-center lg:justify-start">
+                <span className="px-2 py-0.5 rounded bg-black/80 border border-neutral-700 text-[11px] font-mono text-neutral-300">
+                  <strong className="text-white">[W/A/S/D]</strong> Walk / Steer
+                </span>
+                <span className="px-2 py-0.5 rounded bg-black/80 border border-neutral-700 text-[11px] font-mono text-neutral-300">
+                  <strong className="text-pink-400">[F] / [E]</strong> Enter / Exit Vehicle
+                </span>
+                <span className="px-2 py-0.5 rounded bg-black/80 border border-neutral-700 text-[11px] font-mono text-neutral-300">
+                  <strong className="text-cyan-300">[E]</strong> Enter Building Showroom
+                </span>
+                <span className="px-2 py-0.5 rounded bg-black/80 border border-neutral-700 text-[11px] font-mono text-neutral-300">
+                  <strong className="text-amber-400">[M]</strong> Satellite Map & Fast Travel
+                </span>
+              </div>
+            </div>
+
+            {/* GIANT PLAY BUTTON */}
+            <div className="flex flex-col items-center gap-3">
               <button
-                key={project.id}
-                onClick={() => {
-                  gtaAudio.playSelect();
-                  setSelectedProjectId(project.id);
-                }}
-                onMouseEnter={() => {
-                  if (!isSelected) gtaAudio.playHover();
-                }}
-                className={`w-full text-left p-3 cursor-pointer transition-all duration-150 border flex items-center justify-between group ${
-                  isSelected
-                    ? 'bg-[#ec008c] border-white text-white shadow-[0_0_15px_rgba(236,0,140,0.7)] translate-x-1.5'
-                    : 'bg-black/75 hover:bg-white/10 border-white/10 text-neutral-200'
-                }`}
+                onClick={() => handleLaunchGame()}
+                className="group relative px-8 py-5 rounded-xl bg-gradient-to-r from-pink-600 via-rose-500 to-amber-500 hover:from-pink-500 hover:to-amber-400 text-white font-hud font-black text-base sm:text-xl tracking-widest uppercase shadow-[0_0_35px_rgba(236,72,153,0.8)] hover:shadow-[0_0_50px_rgba(236,72,153,1)] hover:scale-105 transition-all cursor-pointer flex items-center gap-3"
               >
-                <div className="flex items-center gap-3">
-                  <span
-                    className={`font-hud text-xs font-bold px-1.5 py-0.5 rounded-xs ${
-                      isSelected ? 'bg-black text-pink-400' : 'bg-white/10 text-white/60'
-                    }`}
-                  >
-                    #{String(idx + 1).padStart(2, '0')}
-                  </span>
+                <Car className="w-6 h-6 text-white group-hover:translate-x-1 transition-transform" />
+                <span>LAUNCH 3D VICE CITY GAME</span>
+                <ArrowRight className="w-5 h-5 text-white/80 group-hover:translate-x-1.5 transition-transform" />
+              </button>
+
+              <div className="text-[11px] font-mono text-neutral-400 tracking-wider">
+                60 FPS WEBGL · 25 3D SITES · AUDIO ENGINE ENABLED
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* DISTRICT FILTERS & SEARCH BAR */}
+        <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+          {/* District Buttons */}
+          <div className="flex flex-wrap items-center gap-2">
+            {[
+              { id: 'all', label: 'ALL HQS (25)', color: 'border-pink-500 text-pink-300' },
+              { id: 'fullstack', label: 'FULL STACK VALLEY (7)', color: 'border-emerald-500 text-emerald-300' },
+              { id: 'ai', label: 'AI & VISION DISTRICT (6)', color: 'border-cyan-500 text-cyan-300' },
+              { id: 'cyber', label: 'CYBER DEFENSE (6)', color: 'border-amber-500 text-amber-300' },
+              { id: 'research', label: 'INNOVATION COMMONS (6)', color: 'border-purple-500 text-purple-300' },
+            ].map((btn) => {
+              const active = selectedFilter === btn.id;
+              return (
+                <button
+                  key={btn.id}
+                  onClick={() => {
+                    try {
+                      gtaAudio.playSelect();
+                    } catch {}
+                    setSelectedFilter(btn.id as DistrictFilter);
+                  }}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-mono font-bold uppercase transition-all cursor-pointer border ${
+                    active
+                      ? 'bg-pink-600/30 border-pink-400 text-white shadow-[0_0_12px_rgba(236,72,153,0.5)]'
+                      : 'bg-neutral-900/80 border-neutral-700/70 text-neutral-400 hover:text-white hover:border-neutral-500'
+                  }`}
+                >
+                  {btn.label}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Search Box */}
+          <div className="relative w-full md:w-72">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
+            <input
+              type="text"
+              placeholder="Search tech, title, district..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-9 pr-3 py-1.5 rounded-lg bg-neutral-900/90 border border-neutral-700 text-white placeholder-neutral-500 text-xs font-mono focus:outline-none focus:border-cyan-400 transition-colors"
+            />
+          </div>
+        </div>
+
+        {/* 25 PROJECT HEADQUARTERS GRID */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredProjects.map((proj, idx) => {
+            const cat = (proj.category || '').toUpperCase();
+            const isAI = cat.includes('AI') || cat.includes('VISION');
+            const isCyber = cat.includes('SECURITY') || cat.includes('CYBER');
+            const isResearch = cat.includes('RESEARCH') || cat.includes('CLOUD');
+
+            const districtBadge = isAI
+              ? 'NORTH AI DISTRICT'
+              : isCyber
+              ? 'CYBER DEFENSE DISTRICT'
+              : isResearch
+              ? 'INNOVATION COMMONS'
+              : 'FULL STACK VALLEY';
+
+            const districtColor = isAI
+              ? 'border-cyan-500/50 text-cyan-300 bg-cyan-950/40'
+              : isCyber
+              ? 'border-amber-500/50 text-amber-300 bg-amber-950/40'
+              : isResearch
+              ? 'border-purple-500/50 text-purple-300 bg-purple-950/40'
+              : 'border-emerald-500/50 text-emerald-300 bg-emerald-950/40';
+
+            return (
+              <div
+                key={proj.id}
+                className="group p-5 rounded-xl bg-neutral-900/70 border border-neutral-800 hover:border-pink-500/70 shadow-lg hover:shadow-[0_0_25px_rgba(236,72,153,0.35)] transition-all flex flex-col justify-between backdrop-blur-md"
+              >
+                <div className="space-y-3">
+                  {/* Top Badges */}
+                  <div className="flex items-center justify-between gap-2">
+                    <span className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase border ${districtColor}`}>
+                      {districtBadge}
+                    </span>
+                    <span className="font-mono text-[10px] text-neutral-400">
+                      HQ #{String(idx + 1).padStart(2, '0')}
+                    </span>
+                  </div>
+
+                  {/* Title & Tagline */}
                   <div>
-                    <div className="font-gta text-xl sm:text-2xl tracking-wider leading-tight">
-                      {project.title}
-                    </div>
-                    <div
-                      className={`font-hud text-[10px] tracking-widest ${
-                        isSelected ? 'text-pink-100' : 'text-cyan-400'
-                      }`}
-                    >
-                      {project.category}
-                    </div>
+                    <h3 className="font-hud text-lg font-black text-white group-hover:text-pink-300 transition-colors uppercase tracking-wider">
+                      {proj.title}
+                    </h3>
+                    {proj.shortDescription && (
+                      <p className="text-xs font-mono text-neutral-400 line-clamp-1 mt-0.5">
+                        {proj.shortDescription}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Problem Statement snippet */}
+                  {(proj.problem || proj.description) && (
+                    <p className="text-xs text-neutral-300/90 font-mono leading-relaxed line-clamp-2">
+                      {proj.problem || proj.description}
+                    </p>
+                  )}
+
+                  {/* Tech stack pills */}
+                  <div className="flex flex-wrap gap-1.5 pt-1">
+                    {(proj.technologies || []).slice(0, 4).map((tech) => (
+                      <span
+                        key={tech}
+                        className="px-2 py-0.5 rounded bg-black/60 border border-neutral-800 text-[10px] font-mono text-neutral-400"
+                      >
+                        {tech}
+                      </span>
+                    ))}
+                    {(proj.technologies || []).length > 4 && (
+                      <span className="px-1.5 py-0.5 text-[10px] font-mono text-neutral-500">
+                        +{(proj.technologies || []).length - 4}
+                      </span>
+                    )}
                   </div>
                 </div>
 
-                <div className="text-right flex flex-col items-end">
-                  <span
-                    className={`font-hud text-xs font-bold ${
-                      isSelected ? 'text-white' : 'text-[#55e055]'
-                    }`}
+                {/* Bottom Actions */}
+                <div className="pt-5 mt-4 border-t border-neutral-800/80 flex items-center justify-between gap-2">
+                  <button
+                    onClick={() => {
+                      try {
+                        gtaAudio.playSelect();
+                      } catch {}
+                      setActiveDossierProj(proj);
+                    }}
+                    className="px-3 py-1.5 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-neutral-300 hover:text-white font-mono text-xs transition-colors cursor-pointer flex items-center gap-1.5"
                   >
-                    {project.bounty}
-                  </span>
-                  <span
-                    className={`font-hud text-[9px] uppercase tracking-wider ${
-                      project.difficulty === 'EXTREME'
-                        ? 'text-amber-400'
-                        : project.difficulty === 'HARD'
-                        ? 'text-pink-400'
-                        : 'text-white/60'
-                    }`}
+                    <FileCode2 className="w-3.5 h-3.5 text-cyan-400" />
+                    <span>DOSSIER</span>
+                  </button>
+
+                  <button
+                    onClick={() => handleLaunchGame(proj.slug || proj.id)}
+                    className="px-3.5 py-1.5 rounded-lg bg-pink-600/20 hover:bg-pink-600 border border-pink-500/60 hover:border-pink-400 text-pink-300 hover:text-white font-mono text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 shadow-[0_0_12px_rgba(236,72,153,0.3)]"
                   >
-                    {project.difficulty}
-                  </span>
+                    <Building2 className="w-3.5 h-3.5 text-pink-400" />
+                    <span>ENTER IN 3D</span>
+                  </button>
                 </div>
-              </button>
+              </div>
             );
           })}
         </div>
 
-        {/* Right Column: Mission Briefing & Holographic Laptop Terminal (matching video 00:24) */}
-        <div className="lg:col-span-7">
-          <div className="bg-black/85 backdrop-blur-md border-2 border-pink-500/60 p-5 sm:p-6 shadow-2xl relative">
-            {/* Mission Dossier Top Bar */}
-            <div className="flex flex-wrap items-center justify-between pb-3 mb-4 border-b border-pink-500/30 gap-2">
-              <div className="flex items-center gap-2">
-                <Crosshair className="w-5 h-5 text-pink-500 animate-spin" />
-                <span className="font-hud text-xs text-pink-400 tracking-widest uppercase">
-                  OPERATION DOSSIER: {selectedProject.title.toUpperCase()}
-                </span>
-              </div>
-              <div className="flex items-center gap-2 font-hud text-xs">
-                <span className="text-white/50">BOUNTY REWARD:</span>
-                <span className="text-[#55e055] font-gta text-2xl tracking-wider">
-                  {selectedProject.bounty}
-                </span>
-              </div>
-            </div>
-
-            {/* Glowing Laptop Terminal Display (Exact Reference Feature in video 00:24) */}
-            <div className="relative my-4 rounded-t-lg bg-neutral-950 border-4 border-neutral-800 p-2 sm:p-4 shadow-[0_0_35px_rgba(236,0,140,0.3)]">
-              {/* Laptop Web Camera Dot */}
-              <div className="w-2 h-2 rounded-full bg-neutral-700 mx-auto mb-2 flex items-center justify-center">
-                <span className="w-1 h-1 rounded-full bg-cyan-400 animate-ping" />
-              </div>
-
-              {/* Laptop Screen Content with image & overlay */}
-              <div className="relative h-[260px] sm:h-[320px] rounded overflow-hidden border border-cyan-500/40 bg-black">
-                <img
-                  src={selectedProject.image}
-                  alt={selectedProject.title}
-                  className="w-full h-full object-cover filter contrast-120 saturate-125"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent pointer-events-none" />
-
-                {/* HUD scanline and target bracket overlay */}
-                <div className="absolute top-3 left-3 bg-black/70 px-2 py-1 border border-pink-500/60 font-hud text-[10px] text-pink-400">
-                  SYSTEM STATUS: OPERATIONAL
-                </div>
-                <div className="absolute bottom-3 left-3 right-3 flex items-end justify-between font-hud">
-                  <div>
-                    <span className="text-[10px] text-white/60 uppercase block">
-                      MISSION DIRECTIVE
-                    </span>
-                    <span className="font-gta text-2xl text-white tracking-wider">
-                      {selectedProject.title}
-                    </span>
-                  </div>
-                  <span className="bg-emerald-950/80 border border-emerald-500 text-emerald-400 text-xs px-2 py-0.5">
-                    ● MISSION ACCOMPLISHED
-                  </span>
-                </div>
-              </div>
-
-              {/* Laptop Keyboard Base Hinge */}
-              <div className="w-48 h-2 bg-neutral-700 mx-auto mt-2 rounded-b-md" />
-            </div>
-
-            {/* Mission Objective & Description */}
-            <div className="space-y-4 pt-2">
-              <div>
-                <span className="font-hud text-xs text-pink-400 tracking-widest block mb-1">
-                  MISSION BRIEFING / OBJECTIVE
-                </span>
-                <p className="text-sm sm:text-base text-neutral-200 leading-relaxed font-normal">
-                  {selectedProject.description}
-                </p>
-              </div>
-
-              {/* Technology Arsenal Stack */}
-              <div>
-                <span className="font-hud text-xs text-pink-400 tracking-widest block mb-2">
-                  TACTICAL TECH STACK DEPLOYED
-                </span>
-                <div className="flex flex-wrap gap-2">
-                  {selectedProject.technologies.map((tech, i) => (
-                    <span
-                      key={i}
-                      className="font-hud text-xs bg-white/10 border border-cyan-500/40 text-cyan-300 px-3 py-1 rounded-xs flex items-center gap-1.5"
-                    >
-                      <Zap className="w-3 h-3 text-yellow-400" />
-                      {tech}
-                    </span>
-                  ))}
-                </div>
-              </div>
-
-              {/* Action Buttons: GitHub, Demo, Contact */}
-              <div className="flex flex-wrap gap-3 pt-4 border-t border-white/10">
-                {selectedProject.github && (
-                  <a
-                    href={selectedProject.github}
-                    target="_blank"
-                    rel="noreferrer"
-                    onClick={() => gtaAudio.playSelect()}
-                    className="flex items-center gap-2 bg-[#ec008c] hover:bg-[#ff007f] text-white px-5 py-2.5 font-gta text-xl tracking-wider shadow-lg cursor-pointer transition-all hover:scale-105"
-                  >
-                    <Github className="w-4 h-4" />
-                    <span>INSPECT SOURCE CODE</span>
-                  </a>
-                )}
-
-                <a
-                  href={selectedProject.demo || selectedProject.github || 'https://github.com/BolnidiManikanta'}
-                  target="_blank"
-                  rel="noreferrer"
-                  onClick={() => gtaAudio.playSelect()}
-                  className="flex items-center gap-2 bg-black/80 hover:bg-white/10 border border-cyan-400 text-cyan-300 px-5 py-2.5 font-gta text-xl tracking-wider cursor-pointer transition-all hover:text-white"
-                >
-                  <ExternalLink className="w-4 h-4 text-cyan-400" />
-                  <span>COMMENCE LIVE OPERATION</span>
-                </a>
-              </div>
-            </div>
-          </div>
-        </div>
+        {/* CLASSIFIED PROJECT DOSSIER MODAL */}
+        {activeDossierProj && (
+          <ProjectDossierModal
+            project={activeDossierProj}
+            currentIndex={projectsData.findIndex((p) => p.id === activeDossierProj.id)}
+            totalProjects={projectsData.length}
+            onClose={() => setActiveDossierProj(null)}
+            onNextProject={() => {
+              const curIdx = projectsData.findIndex((p) => p.id === activeDossierProj.id);
+              const nextIdx = (curIdx + 1) % projectsData.length;
+              setActiveDossierProj(projectsData[nextIdx]);
+            }}
+            onPrevProject={() => {
+              const curIdx = projectsData.findIndex((p) => p.id === activeDossierProj.id);
+              const prevIdx = (curIdx - 1 + projectsData.length) % projectsData.length;
+              setActiveDossierProj(projectsData[prevIdx]);
+            }}
+          />
+        )}
       </div>
     </div>
   );

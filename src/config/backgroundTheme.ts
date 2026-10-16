@@ -15,4 +15,13 @@
  *   Change the value below to: 'data:image/png;base64,iVBORw0KGgo...'
  */
 
-export const INTRO_BACKGROUND_IMAGE: string = '/bg-intro.png';
+import defaultHomepageBg from '../assets/homepage-background.png';
+
+export const INTRO_VIDEO_URL: string = '/Intro.mp4';
+export const ABOUT_PAGE_IMAGE: string = '/about-page.png';
+export const LEADER_PAGE_IMAGE: string = '/leader-page.png';
+export const EXPERIENCE_PAGE_IMAGE: string = '/leader-page.png';
+export const INTRO_BACKGROUND_IMAGE: string = '';
+export const HOMEPAGE_BACKGROUND_IMAGE: string = defaultHomepageBg || '/homepage-background.png';
+export const PROJECT_VAULT_PAGE_IMAGE: string = '/project-vault-page.png';
+

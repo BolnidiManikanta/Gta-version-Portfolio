@@ -18,14 +18,16 @@ interface CyberDistrictViewProps {
   onOpenMissionModal: (mission: ProjectItem, index: number) => void;
 }
 
-// 5 Cybersecurity & Offensive/Defensive Missions
-const CYBER_MISSION_IDS = ['proj-12', 'proj-10', 'proj-8', 'proj-13', 'proj-15'];
-
 export const CyberDistrictView: React.FC<CyberDistrictViewProps> = ({
   onSelectDistrict,
   onOpenMissionModal,
 }) => {
-  const cyberMissions = projectsData.filter((p) => CYBER_MISSION_IDS.includes(p.id));
+  const cyberMissions = projectsData.filter(
+    (p) =>
+      p.category.includes('Security') ||
+      p.category.includes('Cyber') ||
+      p.classification === 'CYBERSECURITY'
+  );
 
   return (
     <div className="relative w-full min-h-[calc(100vh-100px)] flex flex-col justify-between p-4 sm:p-8 select-none">
@@ -131,9 +133,9 @@ export const CyberDistrictView: React.FC<CyberDistrictViewProps> = ({
                 </p>
 
                 <div className="flex flex-wrap gap-1.5 pt-1">
-                  {mission.technologies.slice(0, 3).map((tech) => (
+                  {mission.technologies.slice(0, 3).map((tech, tIdx) => (
                     <span
-                      key={tech}
+                      key={`${mission.id}-${tech}-${tIdx}`}
                       className="px-2 py-0.5 rounded text-[10px] font-hud bg-white/5 border border-white/15 text-neutral-300"
                     >
                       {tech}

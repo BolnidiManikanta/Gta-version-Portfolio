@@ -2,6 +2,7 @@ import React from 'react';
 import { SectionId } from '../../types';
 import { experienceData } from '../../data/portfolioData';
 import { gtaAudio } from '../../utils/audio';
+import { LEADER_PAGE_IMAGE } from '../../config/backgroundTheme';
 import { ArrowLeft, Briefcase, Calendar, CheckCircle2, Shield, Zap } from 'lucide-react';
 
 interface ExperienceViewProps {
@@ -11,17 +12,27 @@ interface ExperienceViewProps {
 export const ExperienceView: React.FC<ExperienceViewProps> = ({ onSelectSection }) => {
   return (
     <div className="relative w-full min-h-screen pt-20 pb-16 px-4 sm:px-8 md:px-14 lg:px-20 flex flex-col justify-start">
-      {/* Background layer: Night skyline overlooking glowing highway traffic streaks (matching video 00:13) */}
-      <div className="fixed inset-0 -z-30 overflow-hidden pointer-events-none">
+      {/* Background layer: Leader Page Backdrop */}
+      <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none select-none">
         <img
-          src="https://images.unsplash.com/photo-1509198397868-475647b2a1e5?w=1920&auto=format&fit=crop&q=80"
-          alt="Night City Highway"
-          className="w-full h-full object-cover filter contrast-125 brightness-35"
+          src={LEADER_PAGE_IMAGE || '/leader-page.png'}
+          alt="Career & Leadership Backdrop"
+          onError={(e) => {
+            const target = e.currentTarget;
+            if (target.src.includes('leader-page.png')) {
+              target.src = '/leader%20page.png';
+            } else {
+              target.src = '/leader-page.png';
+            }
+          }}
+          className="w-full h-full object-cover object-center filter contrast-125 brightness-80 saturate-125"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/80 to-purple-950/40" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/50 to-black/60 pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-transparent to-black/80 pointer-events-none" />
       </div>
 
-      {/* Header: EXPERIENCE + Cursive Journey */}
+      <div className="relative z-10">
+        {/* Header: EXPERIENCE + Cursive Journey */}
       <div className="flex flex-wrap items-end justify-between border-b border-pink-500/40 pb-4 mb-6">
         <div>
           <div className="flex items-center gap-3">
@@ -127,6 +138,7 @@ export const ExperienceView: React.FC<ExperienceViewProps> = ({ onSelectSection 
             </div>
           </div>
         ))}
+      </div>
       </div>
     </div>
   );

@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { DistrictId, ProjectItem } from '../../types';
 import { projectsData } from '../../data/portfolioData';
+import { servicesData } from '../../data/servicesData';
 import { gtaAudio } from '../../utils/audio';
 import {
   Code,
@@ -11,6 +12,8 @@ import {
   Sparkles,
   Server,
   Zap,
+  Briefcase,
+  CheckCircle2,
 } from 'lucide-react';
 
 interface DevDistrictViewProps {
@@ -18,14 +21,20 @@ interface DevDistrictViewProps {
   onOpenMissionModal: (mission: ProjectItem, index: number) => void;
 }
 
-// 6 Full Stack & Software Engineering Missions
-const DEV_MISSION_IDS = ['proj-3', 'proj-6', 'proj-5', 'proj-7', 'proj-9', 'proj-14'];
-
 export const DevDistrictView: React.FC<DevDistrictViewProps> = ({
   onSelectDistrict,
   onOpenMissionModal,
 }) => {
-  const devMissions = projectsData.filter((p) => DEV_MISSION_IDS.includes(p.id));
+  const [activeSubTab, setActiveSubTab] = useState<'missions' | 'services'>('missions');
+
+  const devMissions = projectsData.filter(
+    (p) =>
+      p.category.includes('Full') ||
+      p.category.includes('Web') ||
+      p.category.includes('Software') ||
+      p.classification === 'FULL_STACK' ||
+      p.classification === 'EDUCATION'
+  );
 
   return (
     <div className="relative w-full min-h-[calc(100vh-100px)] flex flex-col justify-between p-4 sm:p-8 select-none">
@@ -47,113 +56,211 @@ export const DevDistrictView: React.FC<DevDistrictViewProps> = ({
         </div>
 
         <div className="flex items-center gap-2 text-xs font-hud">
-          <span className="text-neutral-400">COORDINATES:</span>
-          <span className="px-2 py-1 bg-black/60 border border-blue-500/40 text-blue-400 font-mono rounded">
+          {/* Sub Tab Switcher */}
+          <div className="flex items-center bg-black/80 border border-blue-500/40 rounded p-0.5">
+            <button
+              onClick={() => {
+                gtaAudio.playSelect();
+                setActiveSubTab('missions');
+              }}
+              className={`px-3 py-1 rounded text-xs font-bold transition-all cursor-pointer ${
+                activeSubTab === 'missions'
+                  ? 'bg-blue-600 text-white shadow-[0_0_10px_rgba(59,130,246,0.8)]'
+                  : 'text-neutral-400 hover:text-white'
+              }`}
+            >
+              DEPLOYED MISSIONS ({devMissions.length})
+            </button>
+            <button
+              onClick={() => {
+                gtaAudio.playSelect();
+                setActiveSubTab('services');
+              }}
+              className={`px-3 py-1 rounded text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                activeSubTab === 'services'
+                  ? 'bg-blue-600 text-white shadow-[0_0_10px_rgba(59,130,246,0.8)]'
+                  : 'text-neutral-400 hover:text-white'
+              }`}
+            >
+              <Briefcase className="w-3.5 h-3.5" />
+              <span>SERVICES & SPECS ({servicesData.length})</span>
+            </button>
+          </div>
+
+          <span className="text-neutral-400 hidden sm:inline">COORDINATES:</span>
+          <span className="hidden sm:inline px-2 py-1 bg-black/60 border border-blue-500/40 text-blue-400 font-mono rounded">
             STARFISH ISLAND • SILICON DOCK
           </span>
         </div>
       </div>
 
-      {/* Center Missions Section */}
+      {/* Center Content Section */}
       <div className="my-auto py-6 space-y-6">
-        {/* District Intel Card */}
-        <div className="bg-black/75 backdrop-blur-md border border-blue-500/40 p-5 rounded shadow-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div className="space-y-1">
-            <div className="flex items-center gap-2">
-              <span className="px-2 py-0.5 rounded text-[10px] font-hud font-bold bg-blue-950 text-blue-300 border border-blue-500/40">
-                FULL STACK ENGINE
-              </span>
-              <span className="font-hud text-xs text-neutral-400">
-                {devMissions.length} DEPLOYED ENTERPRISE & WEB ECOSYSTEM MISSIONS
-              </span>
-            </div>
-            <p className="text-xs sm:text-sm text-neutral-300 max-w-3xl leading-relaxed">
-              High-throughput software engineering foundry producing enterprise booking engines (Servify Apps),
-              sub-second live WebSocket messaging clusters (Servify Connect), simulated virtual hardware labs,
-              emergency regional blood matching platforms, and automated code grading systems.
-            </p>
-          </div>
-
-          <div
-            onClick={() => {
-              gtaAudio.playInteract();
-              if (devMissions.length > 0) {
-                onOpenMissionModal(devMissions[0], 0);
-              }
-            }}
-            className="w-full sm:w-auto px-4 py-2.5 bg-blue-950/70 hover:bg-blue-600 border border-blue-500/60 rounded text-blue-300 hover:text-white transition-all cursor-pointer flex items-center justify-center gap-2 font-hud text-xs font-bold"
-          >
-            <Server className="w-4 h-4 text-blue-400" />
-            <span>[ E ] DEV WORKSTATION</span>
-          </div>
-        </div>
-
-        {/* 6 Missions Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {devMissions.map((mission, idx) => (
-            <div
-              key={mission.id}
-              onClick={() => {
-                gtaAudio.playSelect();
-                const globalIdx = projectsData.findIndex((p) => p.id === mission.id);
-                onOpenMissionModal(mission, globalIdx >= 0 ? globalIdx : idx);
-              }}
-              className="bg-black/80 backdrop-blur-md border border-blue-500/30 hover:border-blue-400 p-5 rounded-sm transition-all duration-300 hover:shadow-[0_0_25px_rgba(59,130,246,0.4)] cursor-pointer group flex flex-col justify-between space-y-4"
-            >
-              <div className="space-y-3">
-                <div className="flex items-center justify-between font-hud">
-                  <span className="text-xs font-black text-blue-400 tracking-wider">
-                    MISSION #{String(idx + 1).padStart(2, '0')}
+        {activeSubTab === 'missions' ? (
+          <>
+            {/* District Intel Card */}
+            <div className="bg-black/75 backdrop-blur-md border border-blue-500/40 p-5 rounded shadow-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <span className="px-2 py-0.5 rounded text-[10px] font-hud font-bold bg-blue-950 text-blue-300 border border-blue-500/40">
+                    FULL STACK ENGINE
                   </span>
-                  <span className="text-[10px] px-2 py-0.5 rounded bg-emerald-950/80 text-emerald-300 border border-emerald-500/40 font-bold">
-                    {mission.status}
+                  <span className="font-hud text-xs text-neutral-400">
+                    {devMissions.length} DEPLOYED ENTERPRISE & WEB ECOSYSTEM MISSIONS
                   </span>
                 </div>
+                <p className="text-xs sm:text-sm text-neutral-300 max-w-3xl leading-relaxed">
+                  High-throughput software engineering foundry producing enterprise booking engines (Servify Apps),
+                  sub-second live WebSocket messaging clusters (Servify Connect), simulated virtual hardware labs,
+                  emergency regional blood matching platforms, and automated code grading systems.
+                </p>
+              </div>
 
-                <div className="flex items-start gap-3">
-                  <img
-                    src={mission.image}
-                    alt={mission.title}
-                    className="w-16 h-16 object-cover rounded border border-white/20 filter brightness-90 group-hover:scale-105 transition-transform"
-                  />
-                  <div className="flex-1 space-y-1">
-                    <h3 className="font-vice text-2xl text-white group-hover:text-blue-300 transition-colors">
-                      {mission.title}
-                    </h3>
-                    <div className="text-[11px] font-hud text-neutral-400">
-                      CATEGORY: <span className="text-blue-400 font-bold">{mission.category}</span>
+              <div
+                onClick={() => {
+                  gtaAudio.playInteract();
+                  if (devMissions.length > 0) {
+                    onOpenMissionModal(devMissions[0], 0);
+                  }
+                }}
+                className="w-full sm:w-auto px-4 py-2.5 bg-blue-950/70 hover:bg-blue-600 border border-blue-500/60 rounded text-blue-300 hover:text-white transition-all cursor-pointer flex items-center justify-center gap-2 font-hud text-xs font-bold"
+              >
+                <Server className="w-4 h-4 text-blue-400" />
+                <span>[ E ] DEV WORKSTATION</span>
+              </div>
+            </div>
+
+            {/* 6 Missions Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {devMissions.map((mission, idx) => (
+                <div
+                  key={mission.id}
+                  onClick={() => {
+                    gtaAudio.playSelect();
+                    const globalIdx = projectsData.findIndex((p) => p.id === mission.id);
+                    onOpenMissionModal(mission, globalIdx >= 0 ? globalIdx : idx);
+                  }}
+                  className="bg-black/80 backdrop-blur-md border border-blue-500/30 hover:border-blue-400 p-5 rounded-sm transition-all duration-300 hover:shadow-[0_0_25px_rgba(59,130,246,0.4)] cursor-pointer group flex flex-col justify-between space-y-4"
+                >
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between font-hud">
+                      <span className="text-xs font-black text-blue-400 tracking-wider">
+                        MISSION #{String(idx + 1).padStart(2, '0')}
+                      </span>
+                      <span className="text-[10px] px-2 py-0.5 rounded bg-emerald-950/80 text-emerald-300 border border-emerald-500/40 font-bold">
+                        {mission.status}
+                      </span>
+                    </div>
+
+                    <div className="flex items-start gap-3">
+                      <img
+                        src={mission.image}
+                        alt={mission.title}
+                        className="w-16 h-16 object-cover rounded border border-white/20 filter brightness-90 group-hover:scale-105 transition-transform"
+                      />
+                      <div className="flex-1 space-y-1">
+                        <h3 className="font-vice text-2xl text-white group-hover:text-blue-300 transition-colors">
+                          {mission.title}
+                        </h3>
+                        <div className="text-[11px] font-hud text-neutral-400">
+                          CATEGORY: <span className="text-blue-400 font-bold">{mission.category}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <p className="text-xs text-neutral-300 line-clamp-2 leading-relaxed">
+                      {mission.description}
+                    </p>
+
+                    <div className="flex flex-wrap gap-1.5 pt-1">
+                      {mission.technologies.slice(0, 3).map((tech, tIdx) => (
+                        <span
+                          key={`${mission.id}-${tech}-${tIdx}`}
+                          className="px-2 py-0.5 rounded text-[10px] font-hud bg-white/5 border border-white/15 text-neutral-300"
+                        >
+                          {tech}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between pt-3 border-t border-white/10 font-hud text-xs">
+                    <div className="text-neutral-400">
+                      BOUNTY: <span className="text-emerald-400 font-bold font-mono">{mission.bounty}</span>
+                    </div>
+                    <div className="flex items-center gap-1 text-blue-400 font-bold group-hover:translate-x-1 transition-transform">
+                      <span>START</span>
+                      <ChevronRight className="w-4 h-4" />
                     </div>
                   </div>
                 </div>
-
-                <p className="text-xs text-neutral-300 line-clamp-2 leading-relaxed">
-                  {mission.description}
+              ))}
+            </div>
+          </>
+        ) : (
+          /* Services & Capabilities View */
+          <div className="space-y-6">
+            <div className="bg-black/75 backdrop-blur-md border border-cyan-500/40 p-5 rounded shadow-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <span className="px-2 py-0.5 rounded text-[10px] font-hud font-bold bg-cyan-950 text-cyan-300 border border-cyan-500/40">
+                    SERVICES ARSENAL
+                  </span>
+                  <span className="font-hud text-xs text-neutral-400">
+                    4 SPECIALIZED ENGINEERING DISCIPLINES
+                  </span>
+                </div>
+                <p className="text-xs sm:text-sm text-neutral-300 max-w-3xl leading-relaxed">
+                  Ready for contract, freelance, or full-time deployment. Delivering end-to-end solutions across Full-Stack Web,
+                  Defensive Cybersecurity, AI/Computer Vision Engineering, and Technical Architecture.
                 </p>
-
-                <div className="flex flex-wrap gap-1.5 pt-1">
-                  {mission.technologies.slice(0, 3).map((tech) => (
-                    <span
-                      key={tech}
-                      className="px-2 py-0.5 rounded text-[10px] font-hud bg-white/5 border border-white/15 text-neutral-300"
-                    >
-                      {tech}
-                    </span>
-                  ))}
-                </div>
-              </div>
-
-              <div className="flex items-center justify-between pt-3 border-t border-white/10 font-hud text-xs">
-                <div className="text-neutral-400">
-                  BOUNTY: <span className="text-emerald-400 font-bold font-mono">{mission.bounty}</span>
-                </div>
-                <div className="flex items-center gap-1 text-blue-400 font-bold group-hover:translate-x-1 transition-transform">
-                  <span>START</span>
-                  <ChevronRight className="w-4 h-4" />
-                </div>
               </div>
             </div>
-          ))}
-        </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              {servicesData.map((svc) => (
+                <div
+                  key={svc.id}
+                  className="bg-black/85 backdrop-blur-md border border-blue-500/40 hover:border-cyan-400 p-6 rounded-sm shadow-xl space-y-4 transition-all group"
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <span className="font-mono text-xs font-bold px-2 py-0.5 rounded bg-blue-950 text-blue-300 border border-blue-500/40">
+                        {svc.number}
+                      </span>
+                      <h3 className="font-vice text-2xl text-white group-hover:text-cyan-300 transition-colors pt-1">
+                        {svc.title}
+                      </h3>
+                    </div>
+                    {svc.badge && (
+                      <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-amber-950 text-amber-300 border border-amber-500/40 whitespace-nowrap font-bold">
+                        {svc.badge}
+                      </span>
+                    )}
+                  </div>
+
+                  <p className="text-xs text-neutral-300 leading-relaxed">
+                    {svc.description}
+                  </p>
+
+                  <div className="space-y-2 pt-1 border-t border-white/10">
+                    <div className="text-[10px] font-hud font-bold text-cyan-400 tracking-wider">
+                      WHAT YOU GET:
+                    </div>
+                    <div className="space-y-1">
+                      {svc.whatYouGet.map((item, itemIdx) => (
+                        <div key={itemIdx} className="flex items-start gap-2 text-xs text-neutral-300">
+                          <span className="w-1.5 h-1.5 rounded-full bg-pink-500 shrink-0 mt-1.5" />
+                          <span>{item}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* District Navigation Bar */}

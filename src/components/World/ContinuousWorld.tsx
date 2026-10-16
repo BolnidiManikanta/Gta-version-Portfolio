@@ -10,6 +10,8 @@ import { SkillsView } from '../Skills/SkillsView';
 import { ProjectsView } from '../Projects/ProjectsView';
 import { ExperienceView } from '../Experience/ExperienceView';
 import { AchievementsView } from '../Achievements/AchievementsView';
+import { ResearchView } from '../Research/ResearchView';
+import { ServicesView } from '../Services/ServicesView';
 import { AcademyView } from '../Academy/AcademyView';
 import { ContactView } from '../Contact/ContactView';
 import { MissionCompleteModal } from '../MissionComplete/MissionCompleteModal';
@@ -21,6 +23,7 @@ interface ContinuousWorldProps {
   onUpdateHeroPhoto: (url: string) => void;
   currentSection: SectionId;
   onSelectSection: (section: SectionId) => void;
+  onOpenProjects?: (slug?: string) => void;
 }
 
 const SECTION_ORDER: SectionId[] = [
@@ -28,6 +31,8 @@ const SECTION_ORDER: SectionId[] = [
   'about',
   'skills',
   'projects',
+  'research',
+  'services',
   'experience',
   'achievements',
   'academy',
@@ -36,15 +41,19 @@ const SECTION_ORDER: SectionId[] = [
 ];
 
 const STAGE_TITLES: Record<SectionId, { title: string; subtitle: string; waypointNum: string }> = {
-  start: { title: 'OCEAN DRIVE', subtitle: 'HERO // CAR STAGING', waypointNum: '1/7' },
-  about: { title: 'PENTHOUSE SUITE', subtitle: 'CHARACTER BRIEFING DOSSIER', waypointNum: '2/7' },
-  skills: { title: 'CYBER ARMORY', subtitle: 'TACTICAL WEAPON LOADOUT', waypointNum: '3/7' },
-  projects: { title: 'TACTICAL MAINFRAME', subtitle: 'MISSION CONTROL OPERATIONS', waypointNum: '4/7' },
-  experience: { title: 'SAN ANDREAS FWY', subtitle: 'FIELD DEPLOYMENTS OVERLOOK', waypointNum: '5/7' },
+  start: { title: 'OCEAN DRIVE', subtitle: 'HERO // CAR STAGING', waypointNum: '1/9' },
+  about: { title: 'PENTHOUSE SUITE', subtitle: 'CHARACTER BRIEFING DOSSIER', waypointNum: '2/9' },
+  skills: { title: 'CYBER ARMORY', subtitle: 'TACTICAL WEAPON LOADOUT', waypointNum: '3/9' },
+  projects: { title: 'TACTICAL MAINFRAME', subtitle: 'MISSION CONTROL OPERATIONS', waypointNum: '4/9' },
+  research: { title: 'RESEARCH FACILITY', subtitle: 'PEER-REVIEWED SCIENTIFIC PAPERS', waypointNum: '5/9' },
+  services: { title: 'ENGINEERING AGENCY', subtitle: 'COMMERCIAL SERVICES & OFFERINGS', waypointNum: '6/9' },
+  experience: { title: 'SAN ANDREAS FWY', subtitle: 'FIELD DEPLOYMENTS OVERLOOK', waypointNum: '7/9' },
   achievements: { title: 'TROPHY VAULT', subtitle: 'HONORS & ACCREDITATIONS', waypointNum: '•' },
   academy: { title: 'INSTITUTIONAL ARCHIVE', subtitle: 'ACADEMIC CREDENTIALS', waypointNum: '•' },
-  contact: { title: 'SATELLITE ROOFTOP', subtitle: 'FINAL CINEMATIC // DISPATCH POST', waypointNum: '6/7' },
-  exit: { title: 'LOS SANTOS SUNSET', subtitle: 'MISSION COMPLETE // RESPECT +', waypointNum: '7/7' },
+  contact: { title: 'SATELLITE ROOFTOP', subtitle: 'FINAL CINEMATIC // DISPATCH POST', waypointNum: '8/9' },
+  exit: { title: 'LOS SANTOS SUNSET', subtitle: 'MISSION COMPLETE // RESPECT +', waypointNum: '9/9' },
+  journey: { title: 'CAREER JOURNEY', subtitle: 'OPERATIONAL TIMELINE', waypointNum: '•' },
+  recruiter: { title: 'RECRUITER SCAN', subtitle: 'EXECUTIVE OVERVIEW', waypointNum: '•' },
 };
 
 export const ContinuousWorld: React.FC<ContinuousWorldProps> = ({
@@ -53,6 +62,7 @@ export const ContinuousWorld: React.FC<ContinuousWorldProps> = ({
   onUpdateHeroPhoto,
   currentSection,
   onSelectSection,
+  onOpenProjects,
 }) => {
   const [cameraMode, setCameraMode] = useState<CameraMode>('cinematic');
   const [isTraveling, setIsTraveling] = useState<boolean>(false);
@@ -64,11 +74,15 @@ export const ContinuousWorld: React.FC<ContinuousWorldProps> = ({
     about: null,
     skills: null,
     projects: null,
+    research: null,
+    services: null,
     experience: null,
     achievements: null,
     academy: null,
     contact: null,
     exit: null,
+    journey: null,
+    recruiter: null,
   });
 
   // Cycle camera mode (like pressing 'C' in GTA)
@@ -304,17 +318,41 @@ export const ContinuousWorld: React.FC<ContinuousWorldProps> = ({
           <SkillsView onSelectSection={handleTravelToSection} />
         </section>
 
-        {/* STAGE 4: PROJECTS (Tactical Ops Room & Holographic Mission Selection) */}
+        {/* STAGE 4: WORK / PROJECTS (Empty Pure Black Canvas) */}
         <section
           id="stage-projects"
           data-section-id="projects"
           ref={(el) => (stageRefs.current.projects = el)}
-          className="relative w-full min-h-screen flex items-center"
+          className="relative w-full min-h-screen flex items-center bg-black"
+          style={{ width: '100%', minHeight: '100vh', background: '#000000', margin: 0, padding: 0, border: 'none' }}
         >
-          <ProjectsView onSelectSection={handleTravelToSection} />
+          <ProjectsView
+            onSelectSection={handleTravelToSection}
+            onOpenProjects={onOpenProjects}
+          />
         </section>
 
-        {/* STAGE 5: EXPERIENCE (San Andreas Night Highway & Field Operations) */}
+        {/* STAGE 5: RESEARCH (Peer-Reviewed Scientific Papers & IEEE Proceedings) */}
+        <section
+          id="stage-research"
+          data-section-id="research"
+          ref={(el) => (stageRefs.current.research = el)}
+          className="relative w-full min-h-screen flex items-center"
+        >
+          <ResearchView onSelectSection={handleTravelToSection} />
+        </section>
+
+        {/* STAGE 6: SERVICES (Engineering Capabilities & Deliverables) */}
+        <section
+          id="stage-services"
+          data-section-id="services"
+          ref={(el) => (stageRefs.current.services = el)}
+          className="relative w-full min-h-screen flex items-center"
+        >
+          <ServicesView onSelectSection={handleTravelToSection} />
+        </section>
+
+        {/* STAGE 7: EXPERIENCE (San Andreas Night Highway & Field Operations) */}
         <section
           id="stage-experience"
           data-section-id="experience"

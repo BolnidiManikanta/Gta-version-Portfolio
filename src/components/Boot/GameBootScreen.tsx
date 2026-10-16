@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { DistrictId } from '../../types';
+import { summaryStats } from '../../data/portfolioData';
+import { HOMEPAGE_BACKGROUND_IMAGE, ABOUT_PAGE_IMAGE } from '../../config/backgroundTheme';
 import { gtaAudio } from '../../utils/audio';
 import {
   Volume2,
@@ -10,14 +12,26 @@ import {
   Shield,
   Layers,
   MapPin,
+  Compass,
+  FileText,
+  Sparkles,
+  Terminal,
+  Film,
 } from 'lucide-react';
 
 interface GameBootScreenProps {
   onStartGame: (district?: DistrictId) => void;
   onQuickPortfolio: () => void;
+  onOpenSkills: () => void;
+  onOpenProjects?: () => void;
+  onOpenExperience?: () => void;
+  onOpenAchievements?: () => void;
+  onOpenServices?: () => void;
+  onOpenContact?: () => void;
   isRadioPlaying: boolean;
   onToggleRadio: () => void;
   customHeroPhoto?: string;
+  onReturnToWalkingIntro?: () => void;
 }
 
 interface MenuItem {
@@ -28,25 +42,31 @@ interface MenuItem {
 }
 
 const MENU_ITEMS: MenuItem[] = [
-  { id: 'start', label: 'START GAME', district: 'player_hq' },
-  { id: 'about', label: 'ABOUT ME', district: 'player_hq' },
-  { id: 'skills', label: 'SKILLS', district: 'ai_lab' },
-  { id: 'projects', label: 'PROJECTS', badge: '15+', district: 'ai_lab' },
-  { id: 'experience', label: 'EXPERIENCE', district: 'career_district' },
-  { id: 'achievements', label: 'ACHIEVEMENTS', district: 'achievement_hq' },
-  { id: 'academy', label: 'ACADEMY', district: 'career_district' },
-  { id: 'contact', label: 'CONTACT', district: 'comms_center' },
+  { id: 'start', label: 'ENTER WORLD', district: 'player_hq' },
+  { id: 'skills', label: 'SKILLS', badge: 'TECHNICAL' },
+  { id: 'recruiter', label: 'RECRUITER SCAN', badge: 'QUICK' },
+  { id: 'projects', label: 'PROJECT VAULT', badge: '25 REPOS', district: 'ai_lab' },
+  { id: 'services', label: 'SERVICES & SPECS', badge: 'OFFERINGS', district: 'dev_district' },
+  { id: 'experience', label: 'CAREER & LEADERSHIP', badge: '500+ IMP', district: 'career_district' },
+  { id: 'achievements', label: 'ACHIEVEMENTS & CERTS', badge: '17 CERTS', district: 'achievement_hq' },
+  { id: 'contact', label: 'CONTACT TERMINAL', district: 'comms_center' },
 ];
 
-const DEFAULT_HERO_IMAGE =
-  'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&auto=format&fit=crop&q=85';
+const DEFAULT_HERO_IMAGE = HOMEPAGE_BACKGROUND_IMAGE || '/homepage-background.png';
 
 export const GameBootScreen: React.FC<GameBootScreenProps> = ({
   onStartGame,
   onQuickPortfolio,
+  onOpenSkills,
+  onOpenProjects,
+  onOpenExperience,
+  onOpenAchievements,
+  onOpenServices,
+  onOpenContact,
   isRadioPlaying,
   onToggleRadio,
   customHeroPhoto,
+  onReturnToWalkingIntro,
 }) => {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [currentTime, setCurrentTime] = useState('6:46 PM');
@@ -73,6 +93,40 @@ export const GameBootScreen: React.FC<GameBootScreenProps> = ({
     gtaAudio.playSelect();
     if (item.id === 'start') {
       onStartGame('player_hq');
+    } else if (item.id === 'skills') {
+      onOpenSkills();
+    } else if (item.id === 'projects') {
+      if (onOpenProjects) {
+        onOpenProjects();
+      } else if (item.district) {
+        onStartGame(item.district);
+      }
+    } else if (item.id === 'experience') {
+      if (onOpenExperience) {
+        onOpenExperience();
+      } else if (item.district) {
+        onStartGame(item.district);
+      }
+    } else if (item.id === 'achievements') {
+      if (onOpenAchievements) {
+        onOpenAchievements();
+      } else if (item.district) {
+        onStartGame(item.district);
+      }
+    } else if (item.id === 'services') {
+      if (onOpenServices) {
+        onOpenServices();
+      } else if (item.district) {
+        onStartGame(item.district);
+      }
+    } else if (item.id === 'contact') {
+      if (onOpenContact) {
+        onOpenContact();
+      } else if (item.district) {
+        onStartGame(item.district);
+      }
+    } else if (item.id === 'recruiter') {
+      onQuickPortfolio();
     } else if (item.district) {
       onStartGame(item.district);
     }
@@ -111,32 +165,84 @@ export const GameBootScreen: React.FC<GameBootScreenProps> = ({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [selectedIndex, onToggleRadio, onQuickPortfolio]);
 
+  const homepageBackground = HOMEPAGE_BACKGROUND_IMAGE || '/homepage-background.png';
   const heroImageSrc = customHeroPhoto || DEFAULT_HERO_IMAGE;
 
   return (
-    <div className="relative w-screen min-h-screen bg-black text-white font-sans overflow-x-hidden select-none flex flex-col justify-between">
-      {/* Background Dark Urban Atmosphere */}
-      <div className="fixed inset-0 pointer-events-none -z-20">
+    <div className="relative w-screen min-h-screen text-white font-sans overflow-x-hidden select-none flex flex-col justify-between bg-black">
+      {/* Background Atmosphere - Homepage Background PNG */}
+      <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
         <img
-          src="https://images.unsplash.com/photo-1513694203232-719a280e022f?w=1920&auto=format&fit=crop&q=85"
-          alt="Los Santos Safehouse"
-          className="w-full h-full object-cover object-center filter contrast-125 brightness-30 saturate-85 scale-105"
+          src={homepageBackground}
+          alt="Bolnidi Manikanta Homepage Background"
+          onError={(e) => {
+            const target = e.currentTarget;
+            if (target.src !== '/homepage%20background.png' && target.src !== '/homepage-background.png') {
+              target.src = '/homepage%20background.png';
+            }
+          }}
+          className="w-full h-full object-cover object-center lg:object-[68%_center] filter contrast-105 brightness-95 saturate-105 transition-all duration-700"
         />
-        {/* Dark Vignette and Ambient Gradients */}
-        <div className="absolute inset-0 bg-gradient-to-r from-black/95 via-black/75 to-black/85" />
-        <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black/90" />
+
+        {/* Cinematic Vignette and Left-Side Text Readability Gradient */}
+        <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/45 to-transparent w-full lg:w-3/5 pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/60 pointer-events-none" />
       </div>
 
       {/* Subtle CRT Scanlines & Vignette */}
-      <div className="fixed inset-0 pointer-events-none -z-10 gta-scanlines opacity-30" />
-      <div className="fixed inset-0 pointer-events-none -z-10 gta-vignette" />
+      <div className="fixed inset-0 pointer-events-none z-0 gta-scanlines opacity-20" />
+      <div className="fixed inset-0 pointer-events-none z-0 gta-vignette" />
 
       {/* TOP BAR / HUD */}
       <header className="relative z-20 w-full px-4 sm:px-8 pt-4 pb-2 flex items-start justify-end pointer-events-auto">
         {/* Top Right Cluster: World Mode, Radio, Clock, Cash, Wanted, Health */}
         <div className="flex flex-col items-end gap-2">
           {/* Controls row */}
-          <div className="flex items-center gap-2 sm:gap-3">
+          <div className="flex items-center gap-2 sm:gap-3 flex-wrap justify-end">
+            {/* CINEMATIC INTRO REPLAY */}
+            {onReturnToWalkingIntro && (
+              <button
+                id="start-screen-walking-intro-btn"
+                onClick={() => {
+                  gtaAudio.playSelect();
+                  onReturnToWalkingIntro();
+                }}
+                title="Replay Cinematic Intro Video"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded bg-black/80 hover:bg-neutral-900 border border-cyan-500/70 text-cyan-300 hover:text-white font-hud text-xs tracking-wider font-bold transition-all shadow-[0_0_12px_rgba(6,182,212,0.3)] cursor-pointer"
+              >
+                <Film className="w-3.5 h-3.5 text-cyan-400" />
+                <span>CINEMATIC INTRO</span>
+              </button>
+            )}
+
+            {/* DEDICATED SKILLS BUTTON */}
+            <button
+              id="start-screen-skills-btn"
+              onClick={() => {
+                gtaAudio.playSelect();
+                onOpenSkills();
+              }}
+              title="Open Dedicated Skills Arsenal [/skills]"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded bg-pink-950/70 hover:bg-pink-900/90 border border-pink-500/80 text-pink-200 hover:text-white font-hud text-xs tracking-wider font-bold transition-all shadow-[0_0_12px_rgba(236,0,140,0.4)] cursor-pointer"
+            >
+              <Terminal className="w-3.5 h-3.5 text-pink-300" />
+              <span>SKILLS</span>
+            </button>
+
+            {/* RECRUITER SCAN BUTTON */}
+            <button
+              id="start-screen-recruiter-scan-btn"
+              onClick={() => {
+                gtaAudio.playSelect();
+                onQuickPortfolio();
+              }}
+              title="Open Fast Recruiter / Overview Mode [ESC]"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded bg-purple-950/70 hover:bg-purple-900/90 border border-purple-500/80 text-purple-200 hover:text-white font-hud text-xs tracking-wider font-bold transition-all shadow-[0_0_12px_rgba(168,85,247,0.4)] cursor-pointer"
+            >
+              <FileText className="w-3.5 h-3.5 text-purple-300" />
+              <span>RECRUITER SCAN</span>
+            </button>
+
             {/* CONTINUOUS WORLD BUTTON */}
             <button
               id="start-screen-continuous-world-btn"
@@ -256,6 +362,25 @@ export const GameBootScreen: React.FC<GameBootScreenProps> = ({
               </span>
               <div className="h-[2px] bg-[#ec008c] flex-1 ml-4 shadow-[0_0_10px_rgba(236,0,140,0.8)]" />
             </div>
+
+            {/* Verified Statistics Quick Pill Strip */}
+            <div className="flex flex-wrap items-center gap-1.5 pt-1 text-[11px] font-mono text-neutral-300">
+              <span className="px-2 py-0.5 rounded bg-black/60 border border-pink-500/40 text-pink-300 font-bold">
+                {summaryStats.repositories} Repos
+              </span>
+              <span className="px-2 py-0.5 rounded bg-black/60 border border-purple-500/40 text-purple-300 font-bold">
+                {summaryStats.certifications} Certs
+              </span>
+              <span className="px-2 py-0.5 rounded bg-black/60 border border-cyan-500/40 text-cyan-300 font-bold">
+                {summaryStats.publications} Research Papers
+              </span>
+              <span className="px-2 py-0.5 rounded bg-black/60 border border-emerald-500/40 text-emerald-300 font-bold">
+                {summaryStats.studentsLeadership} Impact
+              </span>
+              <span className="px-2 py-0.5 rounded bg-black/60 border border-yellow-500/40 text-yellow-300 font-bold">
+                CGPA {summaryStats.cgpa}
+              </span>
+            </div>
           </div>
 
           {/* Menu Items Stack */}
@@ -307,55 +432,47 @@ export const GameBootScreen: React.FC<GameBootScreenProps> = ({
           </div>
         </div>
 
-        {/* RIGHT COLUMN: PORTRAIT CHARACTER CARD & SPEC EDITION BADGE */}
-        <div className="w-full lg:w-1/2 flex justify-center lg:justify-end">
-          <div className="relative w-full max-w-md sm:max-w-lg bg-neutral-950 rounded border border-white/20 shadow-[0_0_40px_rgba(0,0,0,0.95)] overflow-hidden">
-            {/* Portrait Image with CRT overlay */}
-            <div className="relative aspect-[4/5] sm:aspect-[4/4.5] w-full overflow-hidden bg-black">
-              <img
-                src={heroImageSrc}
-                alt="Bolnidi Manikanta"
-                className="w-full h-full object-cover object-top filter contrast-115 brightness-95 saturate-110"
-              />
-              {/* Scanlines & Inner shadow overlay */}
-              <div className="absolute inset-0 gta-scanlines pointer-events-none opacity-20" />
-              <div className="absolute inset-0 shadow-[inset_0_0_60px_rgba(0,0,0,0.8)] pointer-events-none" />
+        {/* RIGHT COLUMN: HERO CHARACTER SHOWCASE & GTA SPEC BADGE */}
+        <div className="w-full lg:w-1/2 flex flex-col items-center lg:items-end justify-end self-end pb-2 pointer-events-auto">
+          {/* If the user explicitly provided a custom portrait upload, show it */}
+          {customHeroPhoto ? (
+            <div className="relative w-full max-w-sm bg-black/80 backdrop-blur-md rounded border border-white/20 shadow-[0_0_40px_rgba(0,0,0,0.95)] overflow-hidden mb-3">
+              <div className="relative aspect-[4/5] w-full overflow-hidden bg-black">
+                <img
+                  src={customHeroPhoto}
+                  alt="Bolnidi Manikanta"
+                  className="w-full h-full object-cover object-top"
+                />
+              </div>
+            </div>
+          ) : null}
+
+          {/* Authentic Los Santos License Plate & Bolnidi Special Edition Glassmorphic HUD Badge */}
+          <div className="bg-black/75 backdrop-blur-md px-5 py-3 rounded-lg border border-white/15 shadow-[0_8px_32px_rgba(0,0,0,0.8)] flex items-center justify-between gap-4 max-w-sm w-full">
+            <div className="space-y-0.5">
+              <h3 className="font-gta text-lg sm:text-xl font-bold text-white tracking-wider uppercase leading-none">
+                BOLNIDI SPECIAL EDITION
+              </h3>
+              <div className="font-mono text-[10px] sm:text-xs text-[#ec008c] tracking-widest font-bold uppercase">
+                V8 TWIN-TURBO • CODE ENGINE
+              </div>
+              <div className="font-hud text-[9px] text-neutral-400 tracking-wider uppercase">
+                FULL-STACK & AI RESEARCHER
+              </div>
             </div>
 
-            {/* Hot Pink Accent Divider */}
-            <div className="w-full h-[3px] bg-[#ec008c] shadow-[0_0_10px_rgba(236,0,140,0.9)]" />
-
-            {/* Card Footer: BOLNIDI SPECIAL EDITION & LICENSE PLATE */}
-            <div className="bg-black/95 px-5 py-3.5 flex items-center justify-between border-t border-white/10">
-              <div className="space-y-0.5">
-                <h3 className="font-gta text-xl sm:text-2xl font-bold text-white tracking-wider uppercase leading-none">
-                  BOLNIDI SPECIAL EDITION
-                </h3>
-                <div className="font-mono text-[11px] sm:text-xs text-[#ec008c] tracking-widest font-bold uppercase">
-                  V8 TWIN-TURBO • CODE ENGINE
-                </div>
+            {/* GTA Los Santos Authentic License Plate Graphic */}
+            <div className="relative w-24 sm:w-28 h-10 sm:h-11 bg-[#faf5d8] border-2 border-yellow-600/80 rounded flex flex-col items-center justify-center shadow-lg select-none px-1 overflow-hidden shrink-0">
+              <div className="absolute top-0.5 left-1 w-1 h-1 rounded-full bg-neutral-800" />
+              <div className="absolute top-0.5 right-1 w-1 h-1 rounded-full bg-neutral-800" />
+              <div className="font-hud text-[7px] font-bold text-blue-900 tracking-wider uppercase leading-none">
+                LOS SANTOS
               </div>
-
-              {/* GTA Los Santos Authentic License Plate Graphic */}
-              <div className="relative w-28 sm:w-32 h-11 sm:h-12 bg-[#faf5d8] border-2 border-yellow-600/80 rounded flex flex-col items-center justify-center shadow-lg select-none px-1 overflow-hidden">
-                {/* Plate screws */}
-                <div className="absolute top-1 left-1.5 w-1 h-1 rounded-full bg-neutral-800" />
-                <div className="absolute top-1 right-1.5 w-1 h-1 rounded-full bg-neutral-800" />
-
-                {/* State name */}
-                <div className="font-hud text-[7px] sm:text-[8px] font-bold text-blue-900 tracking-wider uppercase leading-none">
-                  LOS SANTOS
-                </div>
-
-                {/* Stamped Number */}
-                <div className="font-gta text-lg sm:text-xl font-black text-blue-950 tracking-widest uppercase leading-none mt-0.5">
-                  MANI 007
-                </div>
-
-                {/* Registration sticker */}
-                <div className="absolute bottom-1 right-1.5 w-2.5 h-2 bg-yellow-500 rounded-[1px] text-[5px] text-black font-bold flex items-center justify-center">
-                  26
-                </div>
+              <div className="font-gta text-base sm:text-lg font-black text-blue-950 tracking-widest uppercase leading-none mt-0.5">
+                MANI 007
+              </div>
+              <div className="absolute bottom-0.5 right-1 w-2.5 h-1.5 bg-yellow-500 rounded-[1px] text-[4px] text-black font-bold flex items-center justify-center">
+                26
               </div>
             </div>
           </div>

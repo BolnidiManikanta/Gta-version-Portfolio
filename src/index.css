@@ -24,6 +24,27 @@
   font-family: 'Chakra Petch', monospace;
 }
 
+.font-vice {
+  font-family: 'Bebas Neue', sans-serif;
+  letter-spacing: 0.05em;
+}
+
+/* Full HD Ultra-Sharp & Clear Typography Engine */
+.text-hd-sharp {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.text-crisp {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: geometricPrecision;
+}
+
 /* GTA TV scanline & CRT screen texture */
 .gta-scanlines {
   background: linear-gradient(
@@ -106,3 +127,29 @@
 ::-webkit-scrollbar-thumb:hover {
   background: #ff007f;
 }
+
+@keyframes energyPulse {
+  0% {
+    top: 0%;
+    opacity: 0;
+  }
+  20% {
+    opacity: 1;
+  }
+  80% {
+    opacity: 1;
+  }
+  100% {
+    top: 90%;
+    opacity: 0;
+  }
+}
+
+.animate-energy-pulse {
+  animation: energyPulse 3.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.perspective-1000 {
+  perspective: 1000px;
+}
+

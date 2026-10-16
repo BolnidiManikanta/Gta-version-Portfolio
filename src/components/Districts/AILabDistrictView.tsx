@@ -19,16 +19,19 @@ interface AILabDistrictViewProps {
   onOpenMissionModal: (mission: ProjectItem, index: number) => void;
 }
 
-// 4 Featured AI & Computer Vision Missions
-const AI_MISSION_IDS = ['proj-1', 'proj-2', 'proj-11', 'proj-4'];
-
 export const AILabDistrictView: React.FC<AILabDistrictViewProps> = ({
   onSelectDistrict,
   onOpenMissionModal,
 }) => {
   const [activeTab, setActiveTab] = useState<'missions' | 'architecture'>('missions');
 
-  const aiMissions = projectsData.filter((p) => AI_MISSION_IDS.includes(p.id));
+  const aiMissions = projectsData.filter(
+    (p) =>
+      p.category.includes('AI') ||
+      p.category.includes('Vision') ||
+      p.category.includes('Deep Learning') ||
+      p.classification === 'AI_ML'
+  );
 
   return (
     <div className="relative w-full min-h-[calc(100vh-100px)] flex flex-col justify-between p-4 sm:p-8 select-none">
@@ -138,9 +141,9 @@ export const AILabDistrictView: React.FC<AILabDistrictViewProps> = ({
 
                 {/* Tech Chips */}
                 <div className="flex flex-wrap gap-1.5 pt-1">
-                  {mission.technologies.slice(0, 4).map((tech) => (
+                  {mission.technologies.slice(0, 4).map((tech, tIdx) => (
                     <span
-                      key={tech}
+                      key={`${mission.id}-${tech}-${tIdx}`}
                       className="px-2 py-0.5 rounded text-[10px] font-hud bg-white/5 border border-white/15 text-neutral-300"
                     >
                       {tech}

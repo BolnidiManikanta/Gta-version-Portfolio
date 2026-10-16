@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Volume2, VolumeX, Radio, Map, Phone, Pause, FileText, Gamepad2, Home } from 'lucide-react';
+import { Volume2, VolumeX, Radio, Map, Phone, Pause, FileText, Gamepad2, Home, Terminal, FolderGit2 } from 'lucide-react';
 import { DistrictId, AppMode } from '../../types';
 import { DISTRICTS_DATA } from '../../data/districtsData';
 import { gtaAudio } from '../../utils/audio';
@@ -8,6 +8,8 @@ interface TopHUDProps {
   currentDistrict: DistrictId;
   appMode: AppMode;
   onToggleAppMode: () => void;
+  onOpenSkills?: () => void;
+  onOpenProjects?: () => void;
   onOpenMap: () => void;
   onOpenPhone: () => void;
   onOpenPause: () => void;
@@ -21,6 +23,8 @@ export const TopHUD: React.FC<TopHUDProps> = ({
   currentDistrict,
   appMode,
   onToggleAppMode,
+  onOpenSkills,
+  onOpenProjects,
   onOpenMap,
   onOpenPhone,
   onOpenPause,
@@ -121,6 +125,44 @@ export const TopHUD: React.FC<TopHUDProps> = ({
             </>
           )}
         </button>
+
+        {/* Skills Button */}
+        {onOpenSkills && (
+          <button
+            onClick={() => {
+              gtaAudio.playSelect();
+              onOpenSkills();
+            }}
+            title="Open Dedicated Skills Arsenal [/skills]"
+            className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded text-xs font-hud transition-all cursor-pointer shadow-lg ${
+              appMode === 'skills'
+                ? 'bg-[#ec008c] text-white border border-pink-300 font-bold shadow-[0_0_12px_rgba(236,0,140,0.6)]'
+                : 'bg-black/80 hover:bg-pink-900/60 border border-pink-500/50 text-pink-300 hover:text-white'
+            }`}
+          >
+            <Terminal className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">SKILLS</span>
+          </button>
+        )}
+
+        {/* Project Vault Button */}
+        {onOpenProjects && (
+          <button
+            onClick={() => {
+              gtaAudio.playSelect();
+              onOpenProjects();
+            }}
+            title="Open Dedicated Project Vault [/projects]"
+            className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded text-xs font-hud transition-all cursor-pointer shadow-lg ${
+              appMode === 'projects'
+                ? 'bg-[#ec008c] text-white border border-pink-300 font-bold shadow-[0_0_12px_rgba(236,0,140,0.6)]'
+                : 'bg-black/80 hover:bg-pink-900/60 border border-pink-500/50 text-pink-300 hover:text-white'
+            }`}
+          >
+            <FolderGit2 className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">PROJECTS</span>
+          </button>
+        )}
 
         {/* GPS Map Button */}
         <button

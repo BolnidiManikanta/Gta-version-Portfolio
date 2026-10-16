@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { DistrictId, AppMode, TimeOfDay, ProjectItem } from './types';
+import { DistrictId, AppMode, TimeOfDay, ProjectItem, HqHighlightMode } from './types';
 import { profileData, projectsData } from './data/portfolioData';
 import { DISTRICTS_DATA, DISTRICT_LIST } from './data/districtsData';
 import { gtaAudio } from './utils/audio';
@@ -31,15 +31,89 @@ import { CommsCenterDistrictView } from './components/Districts/CommsCenterDistr
 // Recruiter Quick Mode
 import { QuickPortfolioView } from './components/PortfolioMode/QuickPortfolioView';
 
+// Dedicated Skills Page & Cinematic Shell
+import { CinematicShell } from './components/Shell/CinematicShell';
+import { SkillsPage } from './components/Skills/SkillsPage';
+import { WorkPage } from './components/Work/WorkPage';
+import { CareerLeadershipPage } from './components/Experience/CareerLeadershipPage';
+import { AchievementsPage } from './components/Achievements/AchievementsPage';
+import { ResearchPage } from './components/Research/ResearchPage';
+import { AboutPage } from './components/About/AboutPage';
+import { ServicesPage } from './components/Services/ServicesPage';
+import { ContactPage } from './components/Contact/ContactPage';
+import {
+  HOMEPAGE_BACKGROUND_IMAGE,
+  EXPERIENCE_PAGE_IMAGE,
+  LEADER_PAGE_IMAGE,
+  ABOUT_PAGE_IMAGE,
+  PROJECT_VAULT_PAGE_IMAGE,
+} from './config/backgroundTheme';
+
 export default function App() {
+  // Check initial URL route
+  const getInitialRouteInfo = () => {
+    if (typeof window !== 'undefined') {
+      const p = window.location.pathname.toLowerCase();
+      const h = window.location.hash.toLowerCase();
+      if (p === '/skills' || h === '#/skills' || h === '#skills') {
+        return { isPassed: true, isBooted: true, mode: 'skills' as AppMode };
+      }
+      if (
+        p === '/work' || p.startsWith('/work/') || h === '#/work' || h.startsWith('#/work') || h === '#work' ||
+        p.startsWith('/projects') || h.startsWith('#/projects') || h === '#projects'
+      ) {
+        return { isPassed: true, isBooted: true, mode: 'projects' as AppMode };
+      }
+      if (
+        p === '/experience' || p === '/career' || p === '/journey' ||
+        h === '#/experience' || h === '#/career' || h === '#/journey' ||
+        h === '#experience' || h === '#career' || h === '#journey'
+      ) {
+        return { isPassed: true, isBooted: true, mode: 'experience' as AppMode };
+      }
+      if (
+        p === '/achievements' || p === '/certifications' ||
+        h === '#/achievements' || h === '#/certifications' ||
+        h === '#achievements' || h === '#certifications'
+      ) {
+        return { isPassed: true, isBooted: true, mode: 'achievements' as AppMode };
+      }
+      if (p === '/research' || h === '#/research' || h === '#research') {
+        return { isPassed: true, isBooted: true, mode: 'research' as AppMode };
+      }
+      if (p === '/about' || h === '#/about' || h === '#about') {
+        return { isPassed: true, isBooted: true, mode: 'about' as AppMode };
+      }
+      if (p === '/services' || h === '#/services' || h === '#services') {
+        return { isPassed: true, isBooted: true, mode: 'services' as AppMode };
+      }
+      if (p === '/contact' || h === '#/contact' || h === '#contact') {
+        return { isPassed: true, isBooted: true, mode: 'contact' as AppMode };
+      }
+    }
+    return { isPassed: false, isBooted: false, mode: 'game' as AppMode };
+  };
+
+  const initialRoute = getInitialRouteInfo();
+
   // Cinematic Walking Video Intro State (BEFORE existing homepage)
-  const [hasPassedIntro, setHasPassedIntro] = useState(false);
+  const [hasPassedIntro, setHasPassedIntro] = useState(initialRoute.isPassed);
 
   // Boot Sequence State
-  const [isBooted, setIsBooted] = useState(false);
+  const [isBooted, setIsBooted] = useState(initialRoute.isBooted);
+
+  // Selected project for deep linking inside Project Vault
+  const [selectedProjectSlug, setSelectedProjectSlug] = useState<string | undefined>(() => {
+    if (typeof window !== 'undefined') {
+      const match = window.location.pathname.match(/^\/projects\/([a-z0-9-]+)/i) ||
+                    window.location.hash.match(/^#\/projects\/([a-z0-9-]+)/i);
+      if (match && match[1]) return match[1];
+    }
+    return undefined;
+  });
 
   // App Core State
-  const [appMode, setAppMode] = useState<AppMode>('game');
+  const [appMode, setAppMode] = useState<AppMode>(initialRoute.mode);
   const [currentDistrict, setCurrentDistrict] = useState<DistrictId>('player_hq');
   const [timeOfDay, setTimeOfDay] = useState<TimeOfDay>('dusk');
   const [isRadioPlaying, setIsRadioPlaying] = useState(false);
@@ -57,9 +131,17 @@ export default function App() {
     sub: string;
   } | null>(null);
 
+  // Enter World Background Highlight Mode ('vivid' | 'cyber' | 'sunset' | 'panorama')
+  const [hqHighlightMode, setHqHighlightMode] = useState<HqHighlightMode>('vivid');
+
   // Custom photo storage
   const [customHeroPhoto, setCustomHeroPhoto] = useState<string>(() => {
-    return localStorage.getItem('gta_hero_photo') || '';
+    const saved = localStorage.getItem('gta_hero_photo');
+    if (saved === '/about-page.png' || saved === '/about page.png') {
+      localStorage.removeItem('gta_hero_photo');
+      return '';
+    }
+    return saved || '';
   });
 
   const handleUpdateHeroPhoto = (url: string) => {
@@ -78,7 +160,222 @@ export default function App() {
   const handleGoHome = useCallback(() => {
     gtaAudio.playSelect();
     setIsBooted(false);
+    setAppMode('game');
+    try {
+      if (window.location.pathname !== '/') {
+        window.history.pushState({}, '', '/');
+      }
+    } catch {
+      // ignore
+    }
   }, []);
+
+  // Open Dedicated Skills Page (/skills)
+  const handleOpenSkills = useCallback(() => {
+    setHasPassedIntro(true);
+    setIsBooted(true);
+    setAppMode('skills');
+    try {
+      if (window.location.pathname !== '/skills') {
+        window.history.pushState({}, '', '/skills');
+      }
+    } catch {
+      // ignore
+    }
+  }, []);
+
+  // Open Dedicated Project Vault (/projects or /projects/[slug])
+  const handleOpenProjects = useCallback((slug?: string) => {
+    setHasPassedIntro(true);
+    setIsBooted(true);
+    setSelectedProjectSlug(slug);
+    setAppMode('projects');
+    try {
+      const targetPath = slug ? `/projects/${slug}` : '/projects';
+      if (window.location.pathname !== targetPath) {
+        window.history.pushState({}, '', targetPath);
+      }
+    } catch {
+      // ignore
+    }
+  }, []);
+
+  // Open Dedicated Career & Leadership Page (/experience, /career, /journey)
+  const handleOpenExperience = useCallback(() => {
+    setHasPassedIntro(true);
+    setIsBooted(true);
+    setAppMode('experience');
+    try {
+      if (window.location.pathname !== '/experience') {
+        window.history.pushState({}, '', '/experience');
+      }
+    } catch {
+      // ignore
+    }
+  }, []);
+
+  // Open Dedicated Achievements Page (/achievements, /certifications)
+  const handleOpenAchievements = useCallback(() => {
+    setHasPassedIntro(true);
+    setIsBooted(true);
+    setAppMode('achievements');
+    try {
+      if (window.location.pathname !== '/achievements') {
+        window.history.pushState({}, '', '/achievements');
+      }
+    } catch {
+      // ignore
+    }
+  }, []);
+
+  // Open Dedicated Research Page (/research)
+  const handleOpenResearch = useCallback(() => {
+    setHasPassedIntro(true);
+    setIsBooted(true);
+    setAppMode('research');
+    try {
+      if (window.location.pathname !== '/research') {
+        window.history.pushState({}, '', '/research');
+      }
+    } catch {
+      // ignore
+    }
+  }, []);
+
+  // Open Dedicated About Page (/about)
+  const handleOpenAbout = useCallback(() => {
+    setHasPassedIntro(true);
+    setIsBooted(true);
+    setAppMode('about');
+    try {
+      if (window.location.pathname !== '/about') {
+        window.history.pushState({}, '', '/about');
+      }
+    } catch {
+      // ignore
+    }
+  }, []);
+
+  // Open Dedicated Services Page (/services)
+  const handleOpenServices = useCallback(() => {
+    setHasPassedIntro(true);
+    setIsBooted(true);
+    setAppMode('services');
+    try {
+      if (window.location.pathname !== '/services') {
+        window.history.pushState({}, '', '/services');
+      }
+    } catch {
+      // ignore
+    }
+  }, []);
+
+  // Open Dedicated Contact Page (/contact)
+  const handleOpenContact = useCallback(() => {
+    setHasPassedIntro(true);
+    setIsBooted(true);
+    setAppMode('contact');
+    try {
+      if (window.location.pathname !== '/contact') {
+        window.history.pushState({}, '', '/contact');
+      }
+    } catch {
+      // ignore
+    }
+  }, []);
+
+  // Sync browser URL (/skills, /projects, /experience, /achievements, /research, /about, /services, /contact)
+  useEffect(() => {
+    const handleUrlChange = () => {
+      const path = window.location.pathname.toLowerCase();
+      const hash = window.location.hash.toLowerCase();
+
+      if (path === '/skills' || hash === '#/skills' || hash === '#skills') {
+        setHasPassedIntro(true);
+        setIsBooted(true);
+        setAppMode('skills');
+      } else if (
+        path === '/work' ||
+        path.startsWith('/work/') ||
+        hash === '#/work' ||
+        hash.startsWith('#/work') ||
+        hash === '#work' ||
+        path.startsWith('/projects') ||
+        hash.startsWith('#/projects') ||
+        hash === '#projects'
+      ) {
+        setHasPassedIntro(true);
+        setIsBooted(true);
+        const slugMatch =
+          path.match(/^\/(?:projects|work)\/([a-z0-9-]+)/i) ||
+          hash.match(/^#\/(?:projects|work)\/([a-z0-9-]+)/i);
+        if (slugMatch && slugMatch[1]) {
+          setSelectedProjectSlug(slugMatch[1]);
+        }
+        setAppMode('projects');
+      } else if (
+        path === '/experience' ||
+        path === '/career' ||
+        path === '/journey' ||
+        hash === '#/experience' ||
+        hash === '#/career' ||
+        hash === '#/journey' ||
+        hash === '#experience' ||
+        hash === '#career' ||
+        hash === '#journey'
+      ) {
+        setHasPassedIntro(true);
+        setIsBooted(true);
+        setAppMode('experience');
+      } else if (
+        path === '/achievements' ||
+        path === '/certifications' ||
+        hash === '#/achievements' ||
+        hash === '#/certifications' ||
+        hash === '#achievements' ||
+        hash === '#certifications'
+      ) {
+        setHasPassedIntro(true);
+        setIsBooted(true);
+        setAppMode('achievements');
+      } else if (path === '/research' || hash === '#/research' || hash === '#research') {
+        setHasPassedIntro(true);
+        setIsBooted(true);
+        setAppMode('research');
+      } else if (path === '/about' || hash === '#/about' || hash === '#about') {
+        setHasPassedIntro(true);
+        setIsBooted(true);
+        setAppMode('about');
+      } else if (path === '/services' || hash === '#/services' || hash === '#services') {
+        setHasPassedIntro(true);
+        setIsBooted(true);
+        setAppMode('services');
+      } else if (path === '/contact' || hash === '#/contact' || hash === '#contact') {
+        setHasPassedIntro(true);
+        setIsBooted(true);
+        setAppMode('contact');
+      } else if (
+        appMode === 'skills' ||
+        appMode === 'projects' ||
+        appMode === 'experience' ||
+        appMode === 'achievements' ||
+        appMode === 'research' ||
+        appMode === 'about' ||
+        appMode === 'services' ||
+        appMode === 'contact'
+      ) {
+        setAppMode('game');
+      }
+    };
+
+    handleUrlChange();
+    window.addEventListener('popstate', handleUrlChange);
+    window.addEventListener('hashchange', handleUrlChange);
+    return () => {
+      window.removeEventListener('popstate', handleUrlChange);
+      window.removeEventListener('hashchange', handleUrlChange);
+    };
+  }, [appMode]);
 
   // Camera travel handler
   const handleSelectDistrict = useCallback(
@@ -128,14 +425,18 @@ export default function App() {
         setActiveMissionIdx(0);
         break;
       case 'cyber_district':
-        // Open first Cyber mission (proj-12)
-        const cyberIdx = projectsData.findIndex((p) => p.id === 'proj-12');
+        // Open first Cyber mission
+        const cyberIdx = projectsData.findIndex(
+          (p) => p.category.includes('Security') || p.category.includes('Cyber')
+        );
         setActiveMission(projectsData[cyberIdx >= 0 ? cyberIdx : 1]);
         setActiveMissionIdx(cyberIdx >= 0 ? cyberIdx : 1);
         break;
       case 'dev_district':
-        // Open first Dev mission (proj-3)
-        const devIdx = projectsData.findIndex((p) => p.id === 'proj-3');
+        // Open first Dev mission
+        const devIdx = projectsData.findIndex(
+          (p) => p.category.includes('Full') || p.category.includes('Web')
+        );
         setActiveMission(projectsData[devIdx >= 0 ? devIdx : 2]);
         setActiveMissionIdx(devIdx >= 0 ? devIdx : 2);
         break;
@@ -165,38 +466,6 @@ export default function App() {
     setTimeOfDay(nextTime);
     gtaAudio.playSelect();
   };
-
-  // Virtual Camera Scroll Event Listener (Scroll Wheel Controls Camera)
-  useEffect(() => {
-    if (!isBooted || appMode !== 'game' || isMapOpen || isPhoneOpen || isPauseOpen || activeMission) {
-      return;
-    }
-
-    const handleWheel = (e: WheelEvent) => {
-      // Only travel if not scrolling a modal or inner list
-      const now = Date.now();
-      if (now - lastScrollTime.current < 800) return; // 800ms debounce
-      if (Math.abs(e.deltaY) > 40) {
-        lastScrollTime.current = now;
-        if (e.deltaY > 0) {
-          navigateDistrictStep('next');
-        } else {
-          navigateDistrictStep('prev');
-        }
-      }
-    };
-
-    window.addEventListener('wheel', handleWheel, { passive: true });
-    return () => window.removeEventListener('wheel', handleWheel);
-  }, [
-    isBooted,
-    appMode,
-    isMapOpen,
-    isPhoneOpen,
-    isPauseOpen,
-    activeMission,
-    navigateDistrictStep,
-  ]);
 
   // Global Keyboard Controls (WASD, M, P, ESC)
   useEffect(() => {
@@ -264,17 +533,342 @@ export default function App() {
   if (!hasPassedIntro) {
     return (
       <CinematicWalkingIntro
-        onEnter={(targetDistrict?: DistrictId) => {
+        onEnter={() => {
           setHasPassedIntro(true);
-          if (targetDistrict) {
-            setIsBooted(true);
-            setAppMode('game');
-            setCurrentDistrict(targetDistrict);
-          } else {
-            setIsBooted(false);
+          setIsBooted(false);
+          setAppMode('game');
+          try {
+            if (window.location.pathname !== '/') {
+              window.history.pushState({}, '', '/');
+            }
+          } catch {
+            // ignore
           }
         }}
       />
+    );
+  }
+
+  // Dedicated Skills Vault Interactive Command Center
+  if (appMode === 'skills') {
+    return (
+      <SkillsPage
+        onBack={() => {
+          setAppMode('game');
+          try {
+            if (window.location.pathname === '/skills') {
+              window.history.pushState({}, '', '/');
+            }
+          } catch {
+            // ignore
+          }
+        }}
+        onGoHome={handleGoHome}
+        onNavigate={(route: string) => {
+          if (route === '/' || route === 'home') handleGoHome();
+          else if (route === '/about' || route === 'about') handleOpenAbout();
+          else if (route === '/journey' || route === '/experience' || route === 'experience') handleOpenExperience();
+          else if (route === '/projects' || route === '/work' || route === 'projects') handleOpenProjects();
+          else if (route === '/skills') handleOpenSkills();
+          else if (route === '/research' || route === 'research') handleOpenResearch();
+          else if (route === '/achievements' || route === 'achievements') handleOpenAchievements();
+          else if (route === '/services' || route === 'services') handleOpenServices();
+          else if (route === '/contact' || route === 'contact') handleOpenContact();
+          else if (route === '/recruiter' || route === 'recruiter') {
+            setHasPassedIntro(true);
+            setIsBooted(true);
+            setAppMode('quick_portfolio');
+          }
+        }}
+        onSelectProject={(projectId) => {
+          setSelectedProjectSlug(projectId);
+          setAppMode('projects');
+          try {
+            window.history.pushState({}, '', `/projects/${projectId}`);
+          } catch {
+            // ignore
+          }
+        }}
+      />
+    );
+  }
+
+  // Dedicated Project Vault 3D Cinematic Game Experience
+  if (appMode === 'projects') {
+    return (
+      <WorkPage
+        onBack={() => {
+          setAppMode('game');
+          try {
+            if (
+              window.location.pathname.startsWith('/projects') ||
+              window.location.pathname.startsWith('/work')
+            ) {
+              window.history.pushState({}, '', '/');
+            }
+          } catch {
+            // ignore
+          }
+        }}
+        onGoHome={handleGoHome}
+        initialProjectSlug={selectedProjectSlug}
+        onNavigate={(route: string) => {
+          if (route === '/' || route === 'home') handleGoHome();
+          else if (route === '/about' || route === 'about') handleOpenAbout();
+          else if (route === '/journey' || route === '/experience' || route === 'experience') handleOpenExperience();
+          else if (route === '/projects' || route === '/work' || route === 'projects') handleOpenProjects();
+          else if (route === '/skills') handleOpenSkills();
+          else if (route === '/research' || route === 'research') handleOpenResearch();
+          else if (route === '/achievements' || route === 'achievements') handleOpenAchievements();
+          else if (route === '/services' || route === 'services') handleOpenServices();
+          else if (route === '/contact' || route === 'contact') handleOpenContact();
+        }}
+      />
+    );
+  }
+
+  // Dedicated Career & Leadership Page (/experience, /career, /journey)
+  if (appMode === 'experience') {
+    return (
+      <CinematicShell
+        onBack={() => {
+          setAppMode('game');
+          try {
+            if (
+              window.location.pathname.startsWith('/experience') ||
+              window.location.pathname.startsWith('/career') ||
+              window.location.pathname.startsWith('/journey')
+            ) {
+              window.history.pushState({}, '', '/');
+            }
+          } catch {
+            // ignore
+          }
+        }}
+        onGoHome={handleGoHome}
+        isRadioPlaying={isRadioPlaying}
+        onToggleRadio={handleRadioToggle}
+        title="CAREER & LEADERSHIP"
+        badge="VERIFIED FIELD DOSSIER"
+        backgroundImage={LEADER_PAGE_IMAGE || '/leader-page.png'}
+        highlightBackground={true}
+      >
+        <CareerLeadershipPage
+          onBack={() => {
+            setAppMode('game');
+            try {
+              if (
+                window.location.pathname.startsWith('/experience') ||
+                window.location.pathname.startsWith('/career') ||
+                window.location.pathname.startsWith('/journey')
+              ) {
+                window.history.pushState({}, '', '/');
+              }
+            } catch {
+              // ignore
+            }
+          }}
+        />
+      </CinematicShell>
+    );
+  }
+
+  // Dedicated Achievements & Certifications Page (/achievements, /certifications)
+  if (appMode === 'achievements') {
+    return (
+      <CinematicShell
+        onBack={() => {
+          setAppMode('game');
+          try {
+            if (
+              window.location.pathname.startsWith('/achievements') ||
+              window.location.pathname.startsWith('/certifications')
+            ) {
+              window.history.pushState({}, '', '/');
+            }
+          } catch {
+            // ignore
+          }
+        }}
+        onGoHome={handleGoHome}
+        isRadioPlaying={isRadioPlaying}
+        onToggleRadio={handleRadioToggle}
+        title="ACHIEVEMENTS & CERTS"
+        badge="10 TROPHIES • 17 CERTS"
+        backgroundImage={HOMEPAGE_BACKGROUND_IMAGE || '/homepage-background.png'}
+        highlightBackground={true}
+        hideDefaultBackground={true}
+      >
+        <AchievementsPage
+          onBack={() => {
+            setAppMode('game');
+            try {
+              if (
+                window.location.pathname.startsWith('/achievements') ||
+                window.location.pathname.startsWith('/certifications')
+              ) {
+                window.history.pushState({}, '', '/');
+              }
+            } catch {
+              // ignore
+            }
+          }}
+        />
+      </CinematicShell>
+    );
+  }
+
+  // Dedicated Research Page (/research)
+  if (appMode === 'research') {
+    return (
+      <CinematicShell
+        onBack={() => {
+          setAppMode('game');
+          try {
+            if (window.location.pathname.startsWith('/research')) {
+              window.history.pushState({}, '', '/');
+            }
+          } catch {
+            // ignore
+          }
+        }}
+        onGoHome={handleGoHome}
+        isRadioPlaying={isRadioPlaying}
+        onToggleRadio={handleRadioToggle}
+        title="RESEARCH PUBLICATIONS"
+        badge="IEEE XPLORE PROCEEDINGS"
+        backgroundImage={EXPERIENCE_PAGE_IMAGE}
+        highlightBackground={true}
+      >
+        <ResearchPage
+          onBack={() => {
+            setAppMode('game');
+            try {
+              if (window.location.pathname.startsWith('/research')) {
+                window.history.pushState({}, '', '/');
+              }
+            } catch {
+              // ignore
+            }
+          }}
+        />
+      </CinematicShell>
+    );
+  }
+
+  // Dedicated About Page (/about)
+  if (appMode === 'about') {
+    return (
+      <CinematicShell
+        onBack={() => {
+          setAppMode('game');
+          try {
+            if (window.location.pathname.startsWith('/about')) {
+              window.history.pushState({}, '', '/');
+            }
+          } catch {
+            // ignore
+          }
+        }}
+        onGoHome={handleGoHome}
+        isRadioPlaying={isRadioPlaying}
+        onToggleRadio={handleRadioToggle}
+        title="ABOUT OPERATIVE"
+        badge="LEVEL 99 SENIOR ARCHITECT"
+        backgroundImage={ABOUT_PAGE_IMAGE || HOMEPAGE_BACKGROUND_IMAGE}
+        highlightBackground={true}
+      >
+        <AboutPage
+          onBack={() => {
+            setAppMode('game');
+            try {
+              if (window.location.pathname.startsWith('/about')) {
+                window.history.pushState({}, '', '/');
+              }
+            } catch {
+              // ignore
+            }
+          }}
+        />
+      </CinematicShell>
+    );
+  }
+
+  // Dedicated Services Page (/services)
+  if (appMode === 'services') {
+    return (
+      <CinematicShell
+        onBack={() => {
+          setAppMode('game');
+          try {
+            if (window.location.pathname.startsWith('/services')) {
+              window.history.pushState({}, '', '/');
+            }
+          } catch {
+            // ignore
+          }
+        }}
+        onGoHome={handleGoHome}
+        isRadioPlaying={isRadioPlaying}
+        onToggleRadio={handleRadioToggle}
+        title="SERVICES"
+        badge="DIGITAL SOLUTIONS"
+        backgroundImage={HOMEPAGE_BACKGROUND_IMAGE || '/homepage-background.png'}
+        highlightBackground={true}
+      >
+        <ServicesPage
+          onNavigateContact={handleOpenContact}
+          onNavigateProjects={() => handleOpenProjects()}
+          onBack={() => {
+            setAppMode('game');
+            try {
+              if (window.location.pathname.startsWith('/services')) {
+                window.history.pushState({}, '', '/');
+              }
+            } catch {
+              // ignore
+            }
+          }}
+        />
+      </CinematicShell>
+    );
+  }
+
+  // Dedicated Contact Page (/contact)
+  if (appMode === 'contact') {
+    return (
+      <CinematicShell
+        onBack={() => {
+          setAppMode('game');
+          try {
+            if (window.location.pathname.startsWith('/contact')) {
+              window.history.pushState({}, '', '/');
+            }
+          } catch {
+            // ignore
+          }
+        }}
+        onGoHome={handleGoHome}
+        isRadioPlaying={isRadioPlaying}
+        onToggleRadio={handleRadioToggle}
+        title="COMMUNICATIONS TOWER"
+        badge="SECURE RELAY"
+        backgroundImage={HOMEPAGE_BACKGROUND_IMAGE || '/homepage-background.png'}
+        highlightBackground={true}
+      >
+        <ContactPage
+          onBack={() => {
+            setAppMode('game');
+            try {
+              if (window.location.pathname.startsWith('/contact')) {
+                window.history.pushState({}, '', '/');
+              }
+            } catch {
+              // ignore
+            }
+          }}
+        />
+      </CinematicShell>
     );
   }
 
@@ -293,9 +887,16 @@ export default function App() {
           setIsBooted(true);
           setAppMode('quick_portfolio');
         }}
+        onOpenSkills={handleOpenSkills}
+        onOpenProjects={handleOpenProjects}
+        onOpenExperience={handleOpenExperience}
+        onOpenAchievements={handleOpenAchievements}
+        onOpenServices={handleOpenServices}
+        onOpenContact={handleOpenContact}
         isRadioPlaying={isRadioPlaying}
         onToggleRadio={handleRadioToggle}
         customHeroPhoto={customHeroPhoto}
+        onReturnToWalkingIntro={() => setHasPassedIntro(false)}
       />
     );
   }
@@ -313,6 +914,8 @@ export default function App() {
         onToggleAppMode={() =>
           setAppMode((prev) => (prev === 'game' ? 'quick_portfolio' : 'game'))
         }
+        onOpenSkills={handleOpenSkills}
+        onOpenProjects={handleOpenProjects}
         onOpenMap={() => setIsMapOpen(true)}
         onOpenPhone={() => setIsPhoneOpen(true)}
         onOpenPause={() => setIsPauseOpen(true)}
@@ -343,6 +946,7 @@ export default function App() {
           <WorldEnvironment
             currentDistrict={currentDistrict}
             timeOfDay={timeOfDay}
+            hqHighlightMode={hqHighlightMode}
           />
 
           {/* Active District Screen Content */}
@@ -355,6 +959,8 @@ export default function App() {
                 onSelectDistrict={handleSelectDistrict}
                 onOpenPhone={() => setIsPhoneOpen(true)}
                 onOpenMap={() => setIsMapOpen(true)}
+                hqHighlightMode={hqHighlightMode}
+                onHighlightModeChange={setHqHighlightMode}
               />
             )}
 
@@ -461,6 +1067,14 @@ export default function App() {
           setIsMapOpen(true);
         }}
         onSelectDistrict={handleSelectDistrict}
+        onOpenSkills={() => {
+          setIsPhoneOpen(false);
+          handleOpenSkills();
+        }}
+        onOpenProjects={() => {
+          setIsPhoneOpen(false);
+          handleOpenProjects();
+        }}
         isRadioPlaying={isRadioPlaying}
         onToggleRadio={handleRadioToggle}
       />
@@ -472,6 +1086,14 @@ export default function App() {
         onOpenMap={() => setIsMapOpen(true)}
         onOpenPhone={() => setIsPhoneOpen(true)}
         onSelectDistrict={handleSelectDistrict}
+        onOpenSkills={() => {
+          setIsPauseOpen(false);
+          handleOpenSkills();
+        }}
+        onOpenProjects={() => {
+          setIsPauseOpen(false);
+          handleOpenProjects();
+        }}
         appMode={appMode}
         onToggleAppMode={() =>
           setAppMode((prev) => (prev === 'game' ? 'quick_portfolio' : 'game'))

@@ -3,6 +3,7 @@ import { MainMenu } from '../Navigation/MainMenu';
 import { SectionId } from '../../types';
 import { Camera, RefreshCw } from 'lucide-react';
 import { gtaAudio } from '../../utils/audio';
+import { HOMEPAGE_BACKGROUND_IMAGE } from '../../config/backgroundTheme';
 
 interface HeroViewProps {
   currentSection: SectionId;
@@ -12,9 +13,8 @@ interface HeroViewProps {
   onOpenContinuousWorld?: () => void;
 }
 
-// Default cinematic hero character image in GTA Vice City aesthetic
-const DEFAULT_HERO_IMAGE =
-  'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=1200&auto=format&fit=crop&q=80';
+// Default cinematic hero character image from user's uploaded artwork
+const DEFAULT_HERO_IMAGE = HOMEPAGE_BACKGROUND_IMAGE || '/homepage-background.png';
 
 export const HeroView: React.FC<HeroViewProps> = ({
   currentSection,
@@ -43,15 +43,15 @@ export const HeroView: React.FC<HeroViewProps> = ({
 
   return (
     <div className="relative w-full h-screen min-h-[640px] flex items-center justify-between overflow-hidden px-4 sm:px-10 md:px-16 lg:px-24">
-      {/* Background Layer: Sunset dusk skyline with palms & neon lights */}
+      {/* Background Layer: Custom Homepage Background */}
       <div className="absolute inset-0 -z-30 overflow-hidden">
         <img
-          src="https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=1920&auto=format&fit=crop&q=85"
-          alt="Vice City Skyline"
-          className="w-full h-full object-cover object-center scale-105 filter contrast-125 saturate-150"
+          src={HOMEPAGE_BACKGROUND_IMAGE}
+          alt="Homepage Background"
+          className="w-full h-full object-cover object-center scale-105 filter contrast-115 brightness-75 saturate-110"
         />
         {/* Purple / Magenta Sunset Overlay matching reference video */}
-        <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-purple-950/60 to-pink-900/40 mix-blend-multiply" />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-purple-950/45 to-pink-900/30 mix-blend-multiply" />
         <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black/60" />
       </div>
 

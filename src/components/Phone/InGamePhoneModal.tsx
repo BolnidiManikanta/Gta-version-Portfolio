@@ -18,6 +18,8 @@ import {
   Battery,
   User,
   ArrowLeft,
+  Terminal,
+  FolderGit2,
 } from 'lucide-react';
 
 interface InGamePhoneModalProps {
@@ -26,6 +28,8 @@ interface InGamePhoneModalProps {
   profile: ProfileData;
   onOpenMap: () => void;
   onSelectDistrict: (district: DistrictId) => void;
+  onOpenSkills?: () => void;
+  onOpenProjects?: () => void;
   isRadioPlaying: boolean;
   onToggleRadio: () => void;
 }
@@ -38,6 +42,8 @@ export const InGamePhoneModal: React.FC<InGamePhoneModalProps> = ({
   profile,
   onOpenMap,
   onSelectDistrict,
+  onOpenSkills,
+  onOpenProjects,
   isRadioPlaying,
   onToggleRadio,
 }) => {
@@ -226,6 +232,40 @@ export const InGamePhoneModal: React.FC<InGamePhoneModalProps> = ({
                   </div>
                   <span className="text-[10px] font-hud text-neutral-300 font-bold">CITY GPS</span>
                 </button>
+
+                {/* 7. Skills Arsenal */}
+                {onOpenSkills && (
+                  <button
+                    onClick={() => {
+                      gtaAudio.playSelect();
+                      onOpenSkills();
+                      onClose();
+                    }}
+                    className="flex flex-col items-center gap-1.5 p-2 rounded-2xl bg-white/5 hover:bg-pink-600/30 border border-white/10 hover:border-pink-500 transition-all cursor-pointer group"
+                  >
+                    <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-pink-600 to-rose-600 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                      <Terminal className="w-6 h-6 text-white" />
+                    </div>
+                    <span className="text-[10px] font-hud text-neutral-300 font-bold">SKILLS</span>
+                  </button>
+                )}
+
+                {/* 8. Project Vault */}
+                {onOpenProjects && (
+                  <button
+                    onClick={() => {
+                      gtaAudio.playSelect();
+                      onOpenProjects();
+                      onClose();
+                    }}
+                    className="flex flex-col items-center gap-1.5 p-2 rounded-2xl bg-white/5 hover:bg-pink-600/30 border border-white/10 hover:border-pink-500 transition-all cursor-pointer group"
+                  >
+                    <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-pink-500 to-purple-600 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                      <FolderGit2 className="w-6 h-6 text-white" />
+                    </div>
+                    <span className="text-[10px] font-hud text-neutral-300 font-bold">PROJECTS</span>
+                  </button>
+                )}
               </div>
 
               {/* Bottom Quick Call Bar */}

@@ -1,12 +1,16 @@
 export type SectionId = 
   | 'start'
   | 'about'
+  | 'journey'
+  | 'experience'
   | 'skills'
   | 'projects'
-  | 'experience'
+  | 'research'
   | 'achievements'
-  | 'academy'
+  | 'services'
+  | 'recruiter'
   | 'contact'
+  | 'academy'
   | 'exit';
 
 export type DistrictId =
@@ -20,7 +24,19 @@ export type DistrictId =
 
 export type TimeOfDay = 'day' | 'sunset' | 'dusk' | 'night';
 
-export type AppMode = 'game' | 'quick_portfolio';
+export type AppMode =
+  | 'game'
+  | 'quick_portfolio'
+  | 'skills'
+  | 'projects'
+  | 'experience'
+  | 'achievements'
+  | 'research'
+  | 'about'
+  | 'services'
+  | 'contact';
+
+export type HqHighlightMode = 'vivid' | 'cyber' | 'sunset' | 'panorama';
 
 export interface DistrictInfo {
   id: DistrictId;
@@ -43,10 +59,26 @@ export interface DistrictInfo {
   };
 }
 
+export type ProjectClassification =
+  | 'FLAGSHIP'
+  | 'MAJOR'
+  | 'AI_ML'
+  | 'CYBERSECURITY'
+  | 'FULL_STACK'
+  | 'EDUCATION'
+  | 'EXPERIMENT'
+  | 'PORTFOLIO'
+  | 'OTHER';
+
 export interface ProjectItem {
   id: string;
   title: string;
+  slug?: string;
   category: string;
+  projectCategories?: string[];
+  classification?: ProjectClassification;
+  year?: string;
+  shortDescription?: string;
   description: string;
   technologies: string[];
   image: string;
@@ -55,18 +87,40 @@ export interface ProjectItem {
   status: 'COMPLETED' | 'IN PROGRESS' | 'CLASSIFIED';
   bounty: string;
   difficulty: 'EASY' | 'MEDIUM' | 'HARD' | 'EXTREME';
+  problem?: string;
+  targetUsers?: string;
+  solution?: string;
+  architecture?: string;
+  keyFeatures?: string[];
+  engineeringDecisions?: string[];
+  securityConsiderations?: string[];
+  challenges?: string;
+  outcomes?: string;
+  verifiedMetrics?: string;
+  relatedSkills?: string[];
+  relatedCertifications?: string[];
+  relatedResearch?: string[];
+  relatedExperience?: string[];
+  alternateName?: string;
+  isFlagship?: boolean;
+}
+
+export interface SkillItem {
+  name: string;
+  level: number;
+  tag: string;
+  description: string;
+  provenByProjects?: string[];
+  relatedCertifications?: string[];
+  relatedExperience?: string[];
+  relatedResearch?: string[];
 }
 
 export interface SkillCategory {
   id: string;
   name: string;
   iconName: string;
-  skills: {
-    name: string;
-    level: number;
-    tag: string;
-    description: string;
-  }[];
+  skills: SkillItem[];
 }
 
 export interface ExperienceItem {
@@ -78,6 +132,41 @@ export interface ExperienceItem {
   technologies: string[];
   outcome: string;
   badge: string;
+  type?: 'INTERNSHIP' | 'SIMULATION' | 'RESEARCH' | 'LEADERSHIP';
+  verifiedMetric?: string;
+}
+
+export interface LeadershipItem {
+  id: string;
+  role: string;
+  organization: string;
+  period: string;
+  location: string;
+  responsibilities: string[];
+  verifiedImpact: string;
+  impact?: string;
+  description?: string;
+  technologies: string[];
+}
+
+export interface ResearchPublication {
+  id: string;
+  title: string;
+  status: 'PUBLISHED' | 'ACCEPTED — MAJOR REVISION' | 'ACCEPTED FOR PRESENTATION';
+  year: string;
+  venue: string;
+  authors: string[];
+  doi?: string;
+  ieeeUrl?: string;
+  paperLink?: string;
+  acceptanceNote?: string;
+  statusNote?: string;
+  abstract: string;
+  description?: string;
+  researchDomain: string;
+  methodApproach: string;
+  relatedProjectIds: string[];
+  relatedSkills: string[];
 }
 
 export interface AchievementItem {
@@ -85,18 +174,32 @@ export interface AchievementItem {
   title: string;
   date: string;
   category: string;
+  achievementType?: 'HACKATHON' | 'CERTIFICATION' | 'RESEARCH' | 'LEADERSHIP' | 'ACADEMIC' | 'SECURITY';
   description: string;
   status: 'UNLOCKED' | 'COMPLETED';
   xp: string;
   icon: string;
+  credentialId?: string;
+  verifiedMetric?: string;
 }
 
 export interface CertificationItem {
+  id?: string;
   title: string;
   issuer: string;
   date: string;
+  issueDate?: string;
+  issuedDate?: string;
+  expiryDate?: string;
   credentialId?: string;
+  verificationUrl?: string;
+  credentialUrl?: string;
   category: string;
+  categoryGroup?: string;
+  skills?: string[];
+  relatedSkills?: string[];
+  relatedProjects?: string[];
+  verificationStatus?: 'VERIFIED' | 'CREDENTIAL_ID_AVAILABLE' | 'INSTITUTIONAL';
 }
 
 export interface EducationItem {
